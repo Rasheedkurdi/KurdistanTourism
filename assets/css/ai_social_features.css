@@ -1,0 +1,717 @@
+/* AI Recommendations and Social Sharing Features CSS */
+
+/* AI Recommendations Styles */
+.recommendations-section {
+    background: white;
+    border-radius: 15px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.recommendations-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.recommendations-header h3 {
+    margin: 0;
+    color: #333;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.recommendations-header h3 i {
+    color: #667eea;
+}
+
+.recommendations-tabs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    border-bottom: 2px solid #e1e8ed;
+}
+
+.recommendations-tab {
+    padding: 10px 15px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    color: #666;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.recommendations-tab.active {
+    color: #667eea;
+}
+
+.recommendations-tab.active::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: #667eea;
+}
+
+.recommendations-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 15px;
+}
+
+.recommendation-item {
+    background: #f8f9fa;
+    border-radius: 12px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+}
+
+.recommendation-item:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+    border-color: #667eea;
+}
+
+.recommendation-image {
+    width: 100%;
+    height: 120px;
+    overflow: hidden;
+}
+
+.recommendation-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.recommendation-item:hover .recommendation-image img {
+    transform: scale(1.05);
+}
+
+.recommendation-info {
+    padding: 15px;
+}
+
+.recommendation-info h4 {
+    margin: 0 0 8px 0;
+    color: #333;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.recommendation-info p {
+    margin: 0 0 10px 0;
+    color: #666;
+    font-size: 14px;
+    line-height: 1.4;
+}
+
+.recommendation-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 12px;
+}
+
+.rating {
+    color: #f39c12;
+    display: flex;
+    align-items: center;
+    gap: 3px;
+}
+
+.category {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 11px;
+}
+
+.no-recommendations {
+    text-align: center;
+    padding: 40px 20px;
+    color: #999;
+}
+
+.no-recommendations i {
+    font-size: 48px;
+    margin-bottom: 15px;
+    display: block;
+    color: #ddd;
+}
+
+/* Preference Modal Styles */
+.preference-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+}
+
+.preference-modal-content {
+    background: white;
+    border-radius: 20px;
+    padding: 30px;
+    max-width: 500px;
+    width: 90%;
+    max-height: 80vh;
+    overflow-y: auto;
+}
+
+.preference-modal-content h3 {
+    margin: 0 0 20px 0;
+    color: #333;
+    text-align: center;
+}
+
+.category-checkboxes {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 8px;
+    transition: background 0.3s ease;
+}
+
+.checkbox-label:hover {
+    background: #f8f9fa;
+}
+
+.checkbox-label input[type="checkbox"] {
+    margin: 0;
+}
+
+.form-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+    margin-top: 20px;
+}
+
+/* Social Sharing Styles */
+.social-sharing {
+    background: white;
+    border-radius: 15px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.social-sharing h4 {
+    margin: 0 0 15px 0;
+    color: #333;
+    text-align: center;
+}
+
+.share-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+}
+
+.share-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 45px;
+    height: 45px;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    color: white;
+    font-size: 18px;
+    position: relative;
+    overflow: hidden;
+}
+
+.share-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+}
+
+.share-btn.facebook {
+    background: linear-gradient(135deg, #1877f2, #0e5fe4);
+}
+
+.share-btn.twitter {
+    background: linear-gradient(135deg, #1da1f2, #0c85d0);
+}
+
+.share-btn.instagram {
+    background: linear-gradient(135deg, #e4405f, #c13584);
+}
+
+.share-btn.whatsapp {
+    background: linear-gradient(135deg, #25d366, #128c7e);
+}
+
+.share-btn.telegram {
+    background: linear-gradient(135deg, #0088cc, #006699);
+}
+
+.share-btn.email {
+    background: linear-gradient(135deg, #ea4335, #d33b2c);
+}
+
+.share-btn.qrcode {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+}
+
+.share-btn.copy {
+    background: linear-gradient(135deg, #6c757d, #5a6268);
+}
+
+.share-btn span {
+    display: none;
+}
+
+/* Share Modal Styles */
+.share-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+}
+
+.share-modal-content {
+    background: white;
+    border-radius: 20px;
+    padding: 0;
+    max-width: 500px;
+    width: 90%;
+    max-height: 80vh;
+    overflow: hidden;
+}
+
+.share-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    border-bottom: 1px solid #e1e8ed;
+}
+
+.share-modal-header h3 {
+    margin: 0;
+    color: #333;
+}
+
+.close-btn {
+    background: none;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+    color: #999;
+    padding: 5px;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+}
+
+.close-btn:hover {
+    background: #f8f9fa;
+    color: #333;
+}
+
+.share-modal-body {
+    padding: 20px;
+}
+
+.share-preview {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 20px;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 12px;
+}
+
+.share-preview img {
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+    border-radius: 8px;
+}
+
+.share-preview-text h4 {
+    margin: 0 0 8px 0;
+    color: #333;
+    font-size: 16px;
+}
+
+.share-preview-text p {
+    margin: 0;
+    color: #666;
+    font-size: 14px;
+    line-height: 1.4;
+}
+
+.share-buttons-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.share-buttons-grid .share-btn {
+    width: auto;
+    height: auto;
+    padding: 12px;
+    border-radius: 12px;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.share-buttons-grid .share-btn span {
+    display: block;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.share-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+}
+
+/* QR Code Modal Styles */
+.qr-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+}
+
+.qr-modal-content {
+    background: white;
+    border-radius: 20px;
+    padding: 30px;
+    text-align: center;
+    max-width: 300px;
+    width: 90%;
+}
+
+.qr-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.qr-modal-header h3 {
+    margin: 0;
+    color: #333;
+}
+
+.qr-modal-body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+}
+
+.qr-modal-body p {
+    margin: 0;
+    color: #666;
+    font-size: 14px;
+}
+
+/* Floating Share Button */
+.floating-share-btn {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    width: 60px;
+    height: 60px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 24px;
+    box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+    transition: all 0.3s ease;
+    opacity: 0;
+    transform: translateY(100px);
+    z-index: 1000;
+}
+
+.floating-share-btn.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.floating-share-btn:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(102, 126, 234, 0.5);
+}
+
+/* Social Notifications */
+.social-notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: white;
+    border-radius: 10px;
+    padding: 15px 20px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 300px;
+    animation: slideInRight 0.3s ease;
+}
+
+@keyframes slideInRight {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+.social-notification-success {
+    border-left: 4px solid #27ae60;
+    color: #27ae60;
+}
+
+.social-notification-error {
+    border-left: 4px solid #e74c3c;
+    color: #e74c3c;
+}
+
+.social-notification-info {
+    border-left: 4px solid #3498db;
+    color: #3498db;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .recommendations-container {
+        grid-template-columns: 1fr;
+    }
+    
+    .share-buttons-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .share-preview {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .share-preview img {
+        margin: 0 auto;
+    }
+    
+    .floating-share-btn {
+        bottom: 20px;
+        right: 20px;
+        width: 50px;
+        height: 50px;
+        font-size: 20px;
+    }
+    
+    .preference-modal-content {
+        padding: 20px;
+    }
+    
+    .category-checkboxes {
+        grid-template-columns: 1fr;
+    }
+    
+    .social-notification {
+        right: 10px;
+        left: 10px;
+        min-width: auto;
+    }
+}
+
+@media (max-width: 480px) {
+    .share-buttons {
+        justify-content: center;
+    }
+    
+    .share-btn {
+        width: 40px;
+        height: 40px;
+        font-size: 16px;
+    }
+    
+    .share-buttons-grid .share-btn {
+        padding: 10px;
+    }
+    
+    .share-buttons-grid .share-btn span {
+        font-size: 11px;
+    }
+    
+    .recommendations-tabs {
+        flex-wrap: wrap;
+    }
+    
+    .recommendations-tab {
+        font-size: 12px;
+        padding: 8px 12px;
+    }
+}
+
+/* Dark Mode Support */
+body.dark-mode .recommendations-section,
+body.dark-mode .social-sharing,
+body.dark-mode .preference-modal-content,
+body.dark-mode .share-modal-content,
+body.dark-mode .qr-modal-content {
+    background: #2d3748;
+    color: white;
+}
+
+body.dark-mode .recommendations-header h3,
+body.dark-mode .social-sharing h4,
+body.dark-mode .preference-modal-content h3,
+body.dark-mode .share-modal-header h3,
+body.dark-mode .qr-modal-header h3 {
+    color: white;
+}
+
+body.dark-mode .recommendation-item,
+body.dark-mode .share-preview {
+    background: #4a5568;
+}
+
+body.dark-mode .recommendation-info h4,
+body.dark-mode .share-preview-text h4 {
+    color: white;
+}
+
+body.dark-mode .recommendation-info p,
+body.dark-mode .share-preview-text p,
+body.dark-mode .qr-modal-body p {
+    color: #cbd5e0;
+}
+
+body.dark-mode .recommendations-tab {
+    color: #cbd5e0;
+}
+
+body.dark-mode .recommendations-tab.active {
+    color: #667eea;
+}
+
+body.dark-mode .checkbox-label:hover {
+    background: #4a5568;
+}
+
+body.dark-mode .social-notification {
+    background: #2d3748;
+    color: white;
+}
+
+body.dark-mode .share-modal-header {
+    border-bottom-color: #4a5568;
+}
+
+/* Loading States */
+.recommendations-loading {
+    text-align: center;
+    padding: 40px 20px;
+    color: #999;
+}
+
+.recommendations-loading i {
+    font-size: 24px;
+    margin-bottom: 10px;
+    display: block;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* Animation Classes */
+.fade-in {
+    animation: fadeIn 0.5s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.slide-up {
+    animation: slideUp 0.5s ease;
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+/* Accessibility */
+.share-btn:focus,
+.recommendation-item:focus,
+.recommendations-tab:focus,
+.floating-share-btn:focus {
+    outline: 2px solid #667eea;
+    outline-offset: 2px;
+}
+
+/* Print Styles */
+@media print {
+    .social-sharing,
+    .floating-share-btn,
+    .recommendations-section {
+        display: none;
+    }
+}

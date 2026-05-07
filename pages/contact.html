@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="ku" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>پەیوەندی - شوێنە گەشتیاریەکانی کوردستان</title>
+
+    <!-- Leaflet CSS & JS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+
+    <link rel="stylesheet" href="../assets/css/style.css?v=13.0">
+    <link rel="stylesheet" href="../assets/css/pages.css?v=13.0">
+</head>
+
+<body class="content-page">
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo">
+                <div class="logo-icon"><a href="../index.html" style="text-decoration: none;">🏔️</a></div>
+                <div>
+                    <h1><span class="kurdish lang-text" data-key="app_title">شوێنە گەشتیاریەکانی کوردستان</span></h1>
+                    <p class="english lang-text" data-key="app_subtitle">Kurdish Tourism Locations Map</p>
+                </div>
+            </div>
+            <div class="header-actions">
+                <div class="language-switcher">
+                    <button class="lang-btn active" data-lang="ku" onclick="changeLanguage('ku')">کوردی</button>
+                    <button class="lang-btn" data-lang="en" onclick="changeLanguage('en')">English</button>
+                    <button class="lang-btn" data-lang="ar" onclick="changeLanguage('ar')">العربية</button>
+                </div>
+                <button class="icon-btn" id="theme-toggle" type="button" aria-label="Toggle theme">
+                    <i class="fas fa-moon"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="page-content">
+                <div class="page-section">
+                    <h2 class="lang-text" data-key="contact_title">پەیوەندیمان پێوە بکە</h2>
+                    <p class="lang-text" data-key="contact_desc">ئێمە ئامادەین بۆ وەڵامدانەوەی پرسیار و پێشنیارەکانتان. تکایە لە ڕێگەی فۆرمێکەوە یان بە بەکارهێنانی زانیاریەکانی خوارەوە پەیوەندیمان پێوە بکەن.</p>
+                    
+                    <div class="contact-info">
+                        <div class="contact-card">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <h3 class="lang-text" data-key="address_title">ناونیشان</h3>
+                            <p>هەولێر، هەرێمی کوردستان</p>
+                            <p>عێراق</p>
+                        </div>
+                        <div class="contact-card">
+                            <i class="fas fa-phone-alt"></i>
+                            <h3 class="lang-text" data-key="phone_title">ژمارەی پەیوەندی</h3>
+                            <p>+964 750 123 4567</p>
+                            <p>+964 770 987 6543</p>
+                        </div>
+                        <div class="contact-card">
+                            <i class="fas fa-envelope"></i>
+                            <h3 class="lang-text" data-key="email_title">ئیمەیڵ</h3>
+                            <p>info@kurdistantourism.com</p>
+                            <p>support@kurdistantourism.com</p>
+                        </div>
+                        <div class="contact-card">
+                            <i class="fas fa-clock"></i>
+                            <h3 class="lang-text" data-key="hours_title">کاتی کارکردن</h3>
+                            <p>دووشەممە - هەینی: 9:00 - 18:00</p>
+                            <p>شەممە: 10:00 - 14:00</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="page-section">
+                    <h2 class="lang-text" data-key="form_title">فۆرمی پەیوەندی</h2>
+                    <form class="contact-form" id="contact-form">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="lang-text" data-key="full_name">ناوی تەواو</label>
+                                <input type="text" class="form-control" name="full_name" id="full-name" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="lang-text" data-key="email">ئیمەیڵ</label>
+                                <input type="email" class="form-control" name="email" id="email" required>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="lang-text" data-key="phone">مۆبایل</label>
+                                <input type="tel" class="form-control" name="phone" id="phone">
+                            </div>
+                            <div class="form-group">
+                                <label class="lang-text" data-key="subject">بابەت</label>
+                                <input type="text" class="form-control" name="subject" id="subject" required>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="lang-text" data-key="message">پەیام</label>
+                            <textarea class="form-control" name="message" id="message" rows="6" required></textarea>
+                        </div>
+                        <div class="form-footer">
+                            <button type="submit" class="submit-btn">
+                                <i class="fas fa-paper-plane"></i>
+                                <span class="lang-text" data-key="send_message">ناردنی پەیام</span>
+                            </button>
+                            <p class="form-note"><i class="fas fa-lock"></i> <span class="lang-text" data-key="privacy_note">زانیاریەکانی تۆ پارێزراوە و بەکاردەهێنرێت تەنها بۆ وەڵامدانەوەی پەیامەکەت</span></p>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="page-section">
+                    <h2 class="lang-text" data-key="map_title">شوێنی ئێمە لەسەر نەخشە</h2>
+                    <div class="map-mini-container">
+                        <div id="mini-map" style="height: 350px;"></div>
+                    </div>
+                </div>
+
+                <div class="page-section cta-section">
+                    <h2 class="lang-text" data-key="follow_title">بەشداربە لە گەشتەکانماندا</h2>
+                    <p class="lang-text" data-key="follow_desc">شوێنمان بکەوە لە تۆڕە کۆمەڵایەتیەکان بۆ بینینی نوێترین شوێنە گەشتیاریەکان و هەواڵەکان.</p>
+                    <div class="team-social" style="justify-content: center; margin-top: 20px;">
+                        <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+                        <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                        <a href="#" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+                        <a href="#" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Footer -->
+            <footer class="footer" style="width: 100%; border-radius: 0;">
+                <p class="lang-text" data-key="copyright">© 2026 سیستەمی شوێنە گەشتیاریەکانی کوردستان. هەموو مافەکان پارێزراون.</p>
+                <div class="footer-links">
+                    <a href="about.html" class="footer-link lang-text" data-key="about">دەربارە</a>
+                    <a href="contact.html" class="footer-link lang-text" data-key="contact">پەیوەندی</a>
+                    <a href="privacy.html" class="footer-link lang-text" data-key="privacy">تایبەتمەندی</a>
+                    <a href="admin.php" class="footer-link lang-text" data-key="admin_panel">سەرەکی</a>
+                </div>
+            </footer>
+        </div>
+    </div>
+
+    <script>
+        // Language data for contact page
+        const contactLanguageData = {
+            ku: {
+                app_title: 'شوێنە گەشتیاریەکانی کوردستان',
+                app_subtitle: 'نەخشەی شوێنە گەشتیاریەکانی کوردستان',
+                contact_title: 'پەیوەندیمان پێوە بکە',
+                contact_desc: 'ئێمە ئامادەین بۆ وەڵامدانەوەی پرسیار و پێشنیارەکانتان. تکایە لە ڕێگەی فۆرمێکەوە یان بە بەکارهێنانی زانیاریەکانی خوارەوە پەیوەندیمان پێوە بکەن.',
+                address_title: 'ناونیشان',
+                phone_title: 'ژمارەی پەیوەندی',
+                email_title: 'ئیمەیڵ',
+                hours_title: 'کاتی کارکردن',
+                form_title: 'فۆرمی پەیوەندی',
+                full_name: 'ناوی تەواو',
+                email: 'ئیمەیڵ',
+                phone: 'مۆبایل',
+                subject: 'بابەت',
+                message: 'پەیام',
+                send_message: 'ناردنی پەیام',
+                privacy_note: 'زانیاریەکانی تۆ پارێزراوە و بەکاردەهێنرێت تەنها بۆ وەڵامدانەوەی پەیامەکەت',
+                map_title: 'شوێنی ئێمە لەسەر نەخشە',
+                follow_title: 'بەشداربە لە گەشتەکانماندا',
+                follow_desc: 'شوێنمان بکەوە لە تۆڕە کۆمەڵایەتیەکان بۆ بینینی نوێترین شوێنە گەشتیاریەکان و هەواڵەکان.',
+                back_to_home: 'گەڕانەوە بۆ سەرەکی',
+                copyright: '© 2026 سیستەمی شوێنە گەشتیاریەکانی کوردستان. هەموو مافەکان پارێزراون.',
+                about: 'دەربارە',
+                contact: 'پەیوەندی',
+                privacy: 'تایبەتمەندی',
+                admin_panel: 'سەرەکی',
+                message_sent: 'پەیامەکەت بە سەرکەوتوویی نێردرا. سوپاس بۆ پەیوەندیکردن!',
+                sending: 'ناردن...'
+            },
+            en: {
+                app_title: 'Kurdish Tourism Locations',
+                app_subtitle: 'Kurdish Tourism Locations Map',
+                contact_title: 'Contact Us',
+                contact_desc: 'We are ready to answer your questions and suggestions. Please contact us via the form below or using the contact information provided.',
+                address_title: 'Address',
+                phone_title: 'Phone Number',
+                email_title: 'Email',
+                hours_title: 'Working Hours',
+                form_title: 'Contact Form',
+                full_name: 'Full Name',
+                email: 'Email',
+                phone: 'Phone',
+                subject: 'Subject',
+                message: 'Message',
+                send_message: 'Send Message',
+                privacy_note: 'Your information is protected and will only be used to respond to your message.',
+                map_title: 'Our Location on Map',
+                follow_title: 'Join Our Journey',
+                follow_desc: 'Follow us on social media to see the latest tourism locations and news.',
+                back_to_home: 'Back to Home',
+                copyright: '© 2026 Kurdish Tourism Locations System. All rights reserved.',
+                about: 'About',
+                contact: 'Contact',
+                privacy: 'Privacy',
+                admin_panel: 'Home',
+                message_sent: 'Your message has been sent successfully. Thank you for contacting us!',
+                sending: 'Sending...'
+            },
+            ar: {
+                app_title: 'مواقع السياحة الكردية',
+                app_subtitle: 'خريطة مواقع السياحة الكردية',
+                contact_title: 'اتصل بنا',
+                contact_desc: 'نحن على استعداد للإجابة على أسئلتكم واقتراحاتكم. يرجى الاتصال بنا عبر النموذج أدناه أو باستخدام معلومات الاتصال المقدمة.',
+                address_title: 'العنوان',
+                phone_title: 'رقم الهاتف',
+                email_title: 'البريد الإلكتروني',
+                hours_title: 'ساعات العمل',
+                form_title: 'نموذج الاتصال',
+                full_name: 'الاسم الكامل',
+                email: 'البريد الإلكتروني',
+                phone: 'الهاتف',
+                subject: 'الموضوع',
+                message: 'الرسالة',
+                send_message: 'إرسال الرسالة',
+                privacy_note: 'معلوماتك محمية ولن تستخدم إلا للرد على رسالتك.',
+                map_title: 'موقعنا على الخريطة',
+                follow_title: 'انضم إلى رحلتنا',
+                follow_desc: 'تابعنا على وسائل التواصل الاجتماعي لمشاهدة أحدث المواقع السياحية والأخبار.',
+                back_to_home: 'العودة إلى الرئيسية',
+                copyright: '© 2026 نظام مواقع السياحة الكردية. جميع الحقوق محفوظة.',
+                about: 'حول',
+                contact: 'اتصل بنا',
+                privacy: 'الخصوصية',
+                admin_panel: 'الرئيسية',
+                message_sent: 'تم إرسال رسالتك بنجاح. شكرا لاتصالك بنا!',
+                sending: 'جاري الإرسال...'
+            }
+        };
+
+        let miniMap;
+
+        function initMiniMap() {
+            if (typeof L !== 'undefined' && document.getElementById('mini-map')) {
+                miniMap = L.map('mini-map').setView([36.1911, 44.0092], 7);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '&copy; OpenStreetMap contributors',
+                    maxZoom: 19
+                }).addTo(miniMap);
+                
+                // Optional: Add a marker for Erbil
+                L.marker([36.1911, 44.0092]).addTo(miniMap)
+                    .bindPopup('نووسەرگەی سەرەکی - Erbil')
+                    .openPopup();
+            }
+        }
+
+        function changeLanguage(lang) {
+            localStorage.setItem('tourism_language', lang);
+            document.querySelectorAll('.lang-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.dataset.lang === lang) btn.classList.add('active');
+            });
+            
+            document.documentElement.lang = lang;
+            document.documentElement.dir = lang === 'en' ? 'ltr' : 'rtl';
+            
+            document.querySelectorAll('[data-key]').forEach(element => {
+                const key = element.getAttribute('data-key');
+                if (contactLanguageData[lang] && contactLanguageData[lang][key]) {
+                    element.textContent = contactLanguageData[lang][key];
+                }
+            });
+        }
+        
+        // Theme toggle
+        document.getElementById('theme-toggle').addEventListener('click', function() {
+            document.body.classList.toggle('light-mode');
+            const isLight = document.body.classList.contains('light-mode');
+            localStorage.setItem('tourism_theme', isLight ? 'light' : 'dark');
+            const icon = this.querySelector('i');
+            if (isLight) {
+                icon.classList.remove('fa-moon');
+                icon.classList.add('fa-sun');
+            } else {
+                icon.classList.remove('fa-sun');
+                icon.classList.add('fa-moon');
+            }
+        });
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            // Load language
+            const savedLang = localStorage.getItem('tourism_language') || 'ku';
+            changeLanguage(savedLang);
+            
+            // Load theme
+            const savedTheme = localStorage.getItem('tourism_theme') || 'dark';
+            if (savedTheme === 'light') {
+                document.body.classList.add('light-mode');
+                const themeIcon = document.querySelector('#theme-toggle i');
+                if (themeIcon) {
+                    themeIcon.classList.remove('fa-moon');
+                    themeIcon.classList.add('fa-sun');
+                }
+            }
+
+            initMiniMap();
+
+            // Handle form submission
+            const contactForm = document.getElementById('contact-form');
+            if (contactForm) {
+                contactForm.addEventListener('submit', async function(e) {
+                    e.preventDefault();
+                    const formData = new FormData(contactForm);
+                    const data = Object.fromEntries(formData.entries());
+                    
+                    const submitBtn = contactForm.querySelector('button[type="submit"]');
+                    const originalText = submitBtn.innerHTML;
+                    submitBtn.disabled = true;
+                    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> ' + (contactLanguageData[document.documentElement.lang].sending || 'Sending...');
+                    
+                    try {
+                        const response = await fetch('../api.php?endpoint=contact', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(data)
+                        });
+                        
+                        const result = await response.json();
+                        
+                        if (result.success) {
+                            alert(result.message || contactLanguageData[document.documentElement.lang].message_sent || 'Message sent successfully!');
+                            contactForm.reset();
+                        } else {
+                            alert(result.error || 'Error sending message');
+                        }
+                    } catch (err) {
+                        alert('Network error. Please try again.');
+                    } finally {
+                        submitBtn.disabled = false;
+                        submitBtn.innerHTML = originalText;
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+
+</html>

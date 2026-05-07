@@ -1,0 +1,680 @@
+/* 
+ * PAGES.CSS - Modern Redesign for About, Contact, Privacy Pages
+ * Kurdish Tourism Locations - Enhanced Design System
+ */
+
+/* ===== VARIABLES & THEME ===== */
+:root {
+    /* Color Palette */
+    --primary: #3b82f6;
+    --primary-dark: #2563eb;
+    --primary-light: #60a5fa;
+    --secondary: #8b5cf6;
+    --accent: #f59e0b;
+    --accent-dark: #d97706;
+    
+    /* Backgrounds */
+    --bg-dark: #0f172a;
+    --bg-darker: #020617;
+    --bg-card: rgba(15, 23, 42, 0.8);
+    --bg-card-light: rgba(30, 41, 59, 0.6);
+    
+    /* Text */
+    --text-primary: #f1f5f9;
+    --text-secondary: #94a3b8;
+    --text-muted: #64748b;
+    
+    /* Borders & Shadows */
+    --border-color: rgba(255, 255, 255, 0.08);
+    --shadow-lg: 0 20px 40px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 10px 20px rgba(0, 0, 0, 0.2);
+    --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.15);
+    
+    /* Gradients */
+    --gradient-primary: linear-gradient(135deg, #3b82f6, #8b5cf6);
+    --gradient-accent: linear-gradient(135deg, #f59e0b, #ef4444);
+    --gradient-dark: linear-gradient(145deg, #0f172a 0%, #020617 100%);
+    
+    /* Spacing */
+    --radius-lg: 20px;
+    --radius-md: 12px;
+    --radius-sm: 8px;
+    
+    /* Transitions */
+    --transition-fast: 0.2s ease;
+    --transition-normal: 0.3s ease;
+    --transition-slow: 0.5s ease;
+}
+
+/* ===== PAGE LAYOUT ENHANCEMENTS ===== */
+body.content-page .page-content {
+    padding: 2rem 1.5rem;
+    max-width: 1200px;
+    margin: 0 auto;
+    width: 100%;
+}
+
+body.content-page .page-section {
+    background: var(--bg-card);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: 2.5rem;
+    margin-bottom: 2.5rem;
+    box-shadow: var(--shadow-md);
+    transition: transform var(--transition-normal), box-shadow var(--transition-normal);
+}
+
+body.content-page .page-section:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
+}
+
+body.content-page .page-section h2 {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    display: inline-block;
+    position: relative;
+}
+
+body.content-page .page-section h2::after {
+    content: '';
+    position: absolute;
+    bottom: -8px;
+    left: 0;
+    width: 60px;
+    height: 4px;
+    background: var(--gradient-primary);
+    border-radius: 2px;
+}
+
+body.content-page .page-section p {
+    font-size: 1.1rem;
+    line-height: 1.8;
+    color: var(--text-secondary);
+    margin-bottom: 1.5rem;
+}
+
+/* ===== FEATURES GRID REDESIGN ===== */
+body.content-page .features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin-top: 2rem;
+}
+
+body.content-page .feature-card {
+    background: var(--bg-card-light);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 2rem;
+    text-align: center;
+    transition: all var(--transition-normal);
+    position: relative;
+    overflow: hidden;
+}
+
+body.content-page .feature-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background: var(--gradient-primary);
+}
+
+body.content-page .feature-card:hover {
+    transform: translateY(-8px);
+    border-color: var(--primary);
+    box-shadow: var(--shadow-lg);
+}
+
+body.content-page .feature-card i {
+    font-size: 2.5rem;
+    margin-bottom: 1.5rem;
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+}
+
+body.content-page .feature-card h3 {
+    font-size: 1.3rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: var(--text-primary);
+}
+
+body.content-page .feature-card p {
+    font-size: 1rem;
+    color: var(--text-secondary);
+    line-height: 1.6;
+}
+
+/* ===== TEAM SECTION REDESIGN ===== */
+body.content-page .team-section {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 2rem;
+    margin-top: 2rem;
+}
+
+body.content-page .team-member {
+    background: var(--bg-card-light);
+    border-radius: var(--radius-md);
+    padding: 2rem;
+    text-align: center;
+    transition: all var(--transition-normal);
+    border: 1px solid var(--border-color);
+}
+
+body.content-page .team-member:hover {
+    transform: translateY(-6px);
+    border-color: var(--primary);
+    box-shadow: var(--shadow-md);
+}
+
+body.content-page .team-member img {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-bottom: 1.5rem;
+    border: 4px solid var(--primary);
+    padding: 3px;
+}
+
+body.content-page .team-member h4 {
+    font-size: 1.3rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: var(--text-primary);
+}
+
+body.content-page .team-member p {
+    color: var(--accent);
+    font-weight: 500;
+    font-size: 0.95rem;
+}
+
+/* ===== CONTACT INFO REDESIGN ===== */
+body.content-page .contact-info {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-top: 2rem;
+}
+
+body.content-page .contact-card {
+    background: var(--bg-card-light);
+    border-radius: var(--radius-md);
+    padding: 2rem;
+    text-align: center;
+    transition: all var(--transition-normal);
+    border: 1px solid var(--border-color);
+    position: relative;
+    overflow: hidden;
+}
+
+body.content-page .contact-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background: var(--gradient-accent);
+}
+
+body.content-page .contact-card:hover {
+    transform: translateY(-6px);
+    border-color: var(--accent);
+    box-shadow: var(--shadow-md);
+}
+
+body.content-page .contact-card i {
+    font-size: 2.5rem;
+    margin-bottom: 1.5rem;
+    background: var(--gradient-accent);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+}
+
+body.content-page .contact-card h3 {
+    font-size: 1.3rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: var(--text-primary);
+}
+
+body.content-page .contact-card p {
+    color: var(--text-secondary);
+    line-height: 1.6;
+    margin-bottom: 0.5rem;
+}
+
+/* ===== CONTACT FORM REDESIGN ===== */
+body.content-page .contact-form {
+    background: var(--bg-card-light);
+    border-radius: var(--radius-md);
+    padding: 2.5rem;
+    margin-top: 2rem;
+    border: 1px solid var(--border-color);
+}
+
+body.content-page .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+@media (max-width: 768px) {
+    body.content-page .form-row {
+        grid-template-columns: 1fr;
+    }
+}
+
+body.content-page .form-group {
+    margin-bottom: 1.5rem;
+}
+
+body.content-page .form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+body.content-page .form-control {
+    width: 100%;
+    padding: 1rem 1.2rem;
+    background: rgba(15, 23, 42, 0.6);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    color: var(--text-primary);
+    font-size: 1rem;
+    transition: all var(--transition-fast);
+}
+
+body.content-page .form-control::placeholder {
+    color: var(--text-muted);
+}
+
+body.content-page .form-control:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+}
+
+body.content-page textarea.form-control {
+    min-height: 150px;
+    resize: vertical;
+}
+
+body.content-page .form-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    margin-top: 2rem;
+}
+
+body.content-page .submit-btn {
+    background: var(--gradient-primary);
+    color: white;
+    border: none;
+    padding: 1rem 2.5rem;
+    border-radius: var(--radius-sm);
+    font-weight: 600;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: all var(--transition-normal);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+body.content-page .submit-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px rgba(59, 130, 246, 0.3);
+}
+
+body.content-page .form-note {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    margin: 0;
+}
+
+body.content-page .text-muted {
+    color: var(--text-muted);
+}
+
+/* ===== PRIVACY CONTENT STYLING ===== */
+body.content-page .privacy-content {
+    background: var(--bg-card);
+    border-radius: var(--radius-lg);
+    padding: 2.5rem;
+    border: 1px solid var(--border-color);
+}
+
+body.content-page .privacy-section {
+    margin-bottom: 2.5rem;
+    padding-bottom: 2.5rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+body.content-page .privacy-section:last-child {
+    margin-bottom: 0;
+    padding-bottom: 0;
+    border-bottom: none;
+}
+
+body.content-page .privacy-section h3 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+body.content-page .privacy-section h3 i {
+    color: var(--primary);
+}
+
+body.content-page .privacy-section ul {
+    list-style: none;
+    padding-left: 1.5rem;
+}
+
+body.content-page .privacy-section li {
+    margin-bottom: 0.75rem;
+    color: var(--text-secondary);
+    position: relative;
+    padding-left: 1.5rem;
+}
+
+body.content-page .privacy-section li::before {
+    content: '•';
+    color: var(--primary);
+    font-size: 1.5rem;
+    position: absolute;
+    left: 0;
+    top: -2px;
+}
+
+/* ===== MAP CONTAINER STYLING ===== */
+.map-mini-container {
+    margin-top: 1.5rem;
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    border: 1px solid var(--border-color);
+}
+
+.map-mini-container #mini-map {
+    height: 300px;
+    width: 100%;
+}
+
+/* ===== RESPONSIVE DESIGN ===== */
+@media (max-width: 768px) {
+    .page-content {
+        padding: 1rem;
+    }
+    
+    .page-section {
+        padding: 1.5rem;
+    }
+    
+    .page-section h2 {
+        font-size: 1.75rem;
+    }
+    
+    .features-grid,
+    .team-section,
+    .contact-info {
+        grid-template-columns: 1fr;
+    }
+    
+    .contact-form {
+        padding: 1.5rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .page-section {
+        padding: 1.25rem;
+    }
+    
+    .page-section h2 {
+        font-size: 1.5rem;
+    }
+    
+    .feature-card,
+    .team-member,
+    .contact-card {
+        padding: 1.5rem;
+    }
+}
+
+/* ===== MISSION CONTENT ===== */
+body.content-page .mission-content {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    margin-top: 2rem;
+}
+
+body.content-page .mission-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 1.5rem;
+    padding: 1.5rem;
+    background: var(--bg-card-light);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-color);
+    transition: all var(--transition-normal);
+}
+
+body.content-page .mission-item:hover {
+    border-color: var(--accent);
+    transform: translateX(8px);
+}
+
+body.content-page .mission-item i {
+    font-size: 2rem;
+    margin-top: 0.5rem;
+}
+
+body.content-page .mission-item h4 {
+    font-size: 1.3rem;
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+    color: var(--text-primary);
+}
+
+body.content-page .mission-item p {
+    margin-bottom: 0;
+}
+
+/* ===== TEAM SOCIAL ===== */
+body.content-page .team-social {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+
+body.content-page .team-social a {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    background: rgba(59, 130, 246, 0.1);
+    border-radius: 50%;
+    color: var(--primary);
+    transition: all var(--transition-fast);
+}
+
+body.content-page .team-social a:hover {
+    background: var(--primary);
+    color: white;
+    transform: translateY(-3px);
+}
+
+/* ===== CTA SECTION ===== */
+body.content-page .cta-section {
+    text-align: center;
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1));
+    border: 1px solid rgba(59, 130, 246, 0.2);
+}
+
+body.content-page .cta-section h2 {
+    font-size: 2.2rem;
+    margin-bottom: 1rem;
+}
+
+body.content-page .cta-section p {
+    font-size: 1.2rem;
+    max-width: 700px;
+    margin: 0 auto 2rem;
+}
+
+body.content-page .cta-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem 2rem;
+    border-radius: var(--radius-sm);
+    font-weight: 600;
+    font-size: 1.1rem;
+    text-decoration: none;
+    transition: all var(--transition-normal);
+    border: none;
+    cursor: pointer;
+}
+
+body.content-page .btn-primary {
+    background: var(--gradient-primary);
+    color: white;
+}
+
+body.content-page .btn-primary:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 25px rgba(59, 130, 246, 0.3);
+}
+
+body.content-page .btn-secondary {
+    background: transparent;
+    color: var(--primary);
+    border: 2px solid var(--primary);
+}
+
+body.content-page .btn-secondary:hover {
+    background: var(--primary);
+    color: white;
+    transform: translateY(-3px);
+}
+
+/* ===== ANIMATIONS ===== */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+body.content-page .page-section {
+    animation: fadeInUp 0.6s ease-out;
+}
+
+body.content-page .feature-card,
+body.content-page .team-member,
+body.content-page .contact-card,
+body.content-page .mission-item {
+    animation: fadeInUp 0.6s ease-out;
+    animation-fill-mode: both;
+}
+
+body.content-page .feature-card:nth-child(1) { animation-delay: 0.1s; }
+body.content-page .feature-card:nth-child(2) { animation-delay: 0.2s; }
+body.content-page .feature-card:nth-child(3) { animation-delay: 0.3s; }
+body.content-page .feature-card:nth-child(4) { animation-delay: 0.4s; }
+
+body.content-page .team-member:nth-child(1) { animation-delay: 0.1s; }
+body.content-page .team-member:nth-child(2) { animation-delay: 0.2s; }
+body.content-page .team-member:nth-child(3) { animation-delay: 0.3s; }
+body.content-page .team-member:nth-child(4) { animation-delay: 0.4s; }
+
+/* ===== UTILITY CLASSES ===== */
+.text-gradient {
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+}
+
+.text-accent {
+    color: var(--accent);
+}
+
+.badge {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    background: rgba(59, 130, 246, 0.2);
+    color: var(--primary);
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    margin-left: 0.5rem;
+}
+
+.divider {
+    height: 1px;
+    background: var(--border-color);
+    margin: 2rem 0;
+}
+
+/* ===== DARK/LIGHT THEME SUPPORT ===== */
+@media (prefers-color-scheme: light) {
+    :root {
+        --bg-dark: #f8fafc;
+        --bg-darker: #f1f5f9;
+        --bg-card: rgba(255, 255, 255, 0.9);
+        --bg-card-light: rgba(255, 255, 255, 0.8);
+        --text-primary: #0f172a;
+        --text-secondary: #475569;
+        --text-muted: #64748b;
+        --border-color: rgba(0, 0, 0, 0.1);
+        --shadow-lg: 0 20px 40px rgba(0, 0, 0, 0.1);
+        --shadow-md: 0 10px 20px rgba(0, 0, 0, 0.08);
+        --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.05);
+    }
+    
+    .form-control {
+        background: rgba(255, 255, 255, 0.9);
+        color: var(--text-primary);
+    }
+}

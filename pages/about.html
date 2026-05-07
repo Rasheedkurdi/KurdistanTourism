@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="ku" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>دەربارە - شوێنە گەشتیاریەکانی کوردستان</title>
+
+    <!-- Leaflet CSS & JS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Fonts for Kurdish, Arabic, and English -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+
+    <!-- Prevent Caching -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+
+    <link rel="stylesheet" href="../assets/css/style.css?v=13.0">
+    <link rel="stylesheet" href="../assets/css/pages.css?v=13.0">
+</head>
+
+<body class="content-page">
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo">
+                <div class="logo-icon"><a href="../index.html" style="text-decoration: none;">🏔️</a></div>
+                <div>
+                    <h1><span class="kurdish lang-text" data-key="app_title">شوێنە گەشتیاریەکانی کوردستان</span></h1>
+                    <p class="english lang-text" data-key="app_subtitle">Kurdish Tourism Locations Map</p>
+                </div>
+            </div>
+            <div class="header-actions">
+                <div class="language-switcher">
+                    <button class="lang-btn active" data-lang="ku" onclick="changeLanguage('ku')">کوردی</button>
+                    <button class="lang-btn" data-lang="en" onclick="changeLanguage('en')">English</button>
+                    <button class="lang-btn" data-lang="ar" onclick="changeLanguage('ar')">العربية</button>
+                </div>
+                <button class="icon-btn" id="theme-toggle" type="button" aria-label="Toggle theme">
+                    <i class="fas fa-moon"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="page-content">
+                <div class="page-section">
+                    <h2 class="lang-text" data-key="about_title">دەربارەی ئێمە</h2>
+                    <p class="lang-text" data-key="about_desc1">بەخێربێن بۆ سیستەمی شوێنە گەشتیاریەکانی کوردستان. ئەم
+                        پڕۆژەیە هەوڵێکە بۆ ناساندنی ڕووداوە سروشتی و مێژووییەکانی کوردستان لە ڕێگەی نەخشەیەکی
+                        ئینتەرنێتییەوە.</p>
+                    <p class="lang-text" data-key="about_desc2">ئێمە تیمیەکی گەشتیاری و تەکنەلۆژیا بین کە هەوڵ دەدەین
+                        شوێنە سەرنجڕاکێشەکانی کوردستان بە شێوەیەکی ئاسان و خێرا بە هەموو کەسێک بگەیەنین. ئامانجمان
+                        ئەوەیە کە گەشتیاران و خەڵکی ناوچەکە بتوانن زانیاری ورد و دروست لەسەر شوێنە گەشتیاریەکان بەدەست
+                        بهێنن.</p>
+
+                    <div class="divider"></div>
+
+                    <h3 class="lang-text" data-key="our_features">تایبەتمەندیەکانی سیستەم</h3>
+
+                    <div class="features-grid">
+                        <div class="feature-card">
+                            <i class="fas fa-map-marked-alt"></i>
+                            <h3 class="lang-text" data-key="feature1_title">نەخشەی ئینتەرنێتی</h3>
+                            <p class="lang-text" data-key="feature1_desc">نەخشەیەکی زیندوو کە هەموو شوێنە گەشتیاریەکانی
+                                کوردستان لەخۆ دەگرێت.</p>
+                            <span class="badge">NEW</span>
+                        </div>
+                        <div class="feature-card">
+                            <i class="fas fa-info-circle"></i>
+                            <h3 class="lang-text" data-key="feature2_title">زانیاری ورد</h3>
+                            <p class="lang-text" data-key="feature2_desc">زانیاری تەواو لەسەر هەر شوێنێک وەک مێژوو،
+                                شوێن، و وێنە.</p>
+                        </div>
+                        <div class="feature-card">
+                            <i class="fas fa-language"></i>
+                            <h3 class="lang-text" data-key="feature3_title">سێ زمان</h3>
+                            <p class="lang-text" data-key="feature3_desc">سیستەمەکە بە سێ زمان (کوردی، ئینگلیزی، عەرەبی)
+                                بەردەستە.</p>
+                        </div>
+                        <div class="feature-card">
+                            <i class="fas fa-mobile-alt"></i>
+                            <h3 class="lang-text" data-key="feature4_title">هاوسەنگی لەگەڵ مۆبایل</h3>
+                            <p class="lang-text" data-key="feature4_desc">سیستەمەکە بە باشی لەسەر مۆبایل و تابلێت کار
+                                دەکات.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="page-section">
+                    <h2 class="lang-text" data-key="mission_title">ئامانج و بینیمان</h2>
+                    <div class="mission-content">
+                        <div class="mission-item">
+                            <i class="fas fa-bullseye text-accent"></i>
+                            <div>
+                                <h4 class="lang-text" data-key="mission_goal">ئامانجی سەرەکی</h4>
+                                <p class="lang-text" data-key="mission_desc1">ئامانجی سەرەکی ئێمە پەرەپێدانی گەشتیاری لە
+                                    کوردستانە و یارمەتیدانی گەشتیاران بۆ دۆزینەوەی شوێنە سەرنجڕاکێشەکان.</p>
+                            </div>
+                        </div>
+                        <div class="mission-item">
+                            <i class="fas fa-eye text-accent"></i>
+                            <div>
+                                <h4 class="lang-text" data-key="mission_vision">بینیمان</h4>
+                                <p class="lang-text" data-key="mission_desc2">ئێمە باوەڕمان وایە کە کوردستان زەوییەکی پڕ
+                                    لە ڕووداوە سروشتی و مێژووییە کە پێویستی بە ناساندنی زیاتر هەیە. لەڕێگەی ئەم
+                                    پڕۆژەیەوە، هەوڵ دەدەین ئەم شوێنانە بە جیهان بناسێنین.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="page-section">
+                    <h2 class="lang-text" data-key="team_title">تیمەکەمان</h2>
+                    <p class="lang-text" data-key="team_desc">ئێمە تیمیەکی پڕۆفیشناڵین کە لە بوارە جیاوازەکان کاریان
+                        دەکات و هەوڵ دەدەین باشترین خزمەتگوزاری پێشکەش بکەین.</p>
+
+                    <div class="team-section">
+                        <div class="team-member">
+                            <img src="https://ui-avatars.com/api/?name=Rasheedkurdi+K&background=3b82f6&color=fff&size=150"
+                                alt="Ahmed">
+                            <h4>Rasheed Masoud</h4>
+                            <p>گەشەپێدەری وێب</p>
+                            <div class="team-social">
+                                <a href="www.linkedin.com/in/rasheed-mzere-2b00293b9"><i
+                                        class="fab fa-linkedin"></i></a>
+                                <a href="https://github.com/Rasheedkurdi"><i class="fab fa-github"></i></a>
+                                <a href="https://www.instagram.com/rasheedkorde/"><i class="fab fa-instagram"></i></a>
+                            </div>
+                        </div>
+                        <div class="team-member">
+                            <img src="https://ui-avatars.com/api/?name=Sara+M&background=8b5cf6&color=fff&size=150"
+                                alt="Sara">
+                            <h4>سارا م.</h4>
+                            <p>دیزاینەر</p>
+                            <div class="team-social">
+                                <a href="#"><i class="fab fa-linkedin"></i></a>
+                                <a href="#"><i class="fab fa-dribbble"></i></a>
+                                <a href="#"><i class="fab fa-behance"></i></a>
+                            </div>
+                        </div>
+                        <div class="team-member">
+                            <img src="https://ui-avatars.com/api/?name=Karim+H&background=f59e0b&color=fff&size=150"
+                                alt="Karim">
+                            <h4>کەریم ه.</h4>
+                            <p>شارەزای گەشتیاری</p>
+                            <div class="team-social">
+                                <a href="#"><i class="fab fa-linkedin"></i></a>
+                                <a href="#"><i class="fas fa-globe"></i></a>
+                                <a href="#"><i class="fab fa-instagram"></i></a>
+                            </div>
+                        </div>
+                        <div class="team-member">
+                            <img src="https://ui-avatars.com/api/?name=Noura+A&background=ef4444&color=fff&size=150"
+                                alt="Noura">
+                            <h4>نورا ع.</h4>
+                            <p>بەڕێوەبەری پڕۆژە</p>
+                            <div class="team-social">
+                                <a href="#"><i class="fab fa-linkedin"></i></a>
+                                <a href="#"><i class="fab fa-twitter"></i></a>
+                                <a href="#"><i class="fas fa-envelope"></i></a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="page-section cta-section">
+                    <h2 class="lang-text" data-key="ready_to_explore">ئامادەیت بۆ گەشتکردن؟</h2>
+                    <p class="lang-text" data-key="cta_desc">دەست بکە بە گەشتکردن لە ڕووداوە سەرنجڕاکێشەکانی کوردستان.
+                        نەخشەکەمان بکەرەوە و شوێنەکە بدۆزەوە!</p>
+                    <div class="cta-buttons">
+                        <a href="../index.html" class="btn btn-primary">
+                            <i class="fas fa-map"></i>
+                            <span class="lang-text" data-key="explore_map">نەخشەکە ببینە</span>
+                        </a>
+                        <a href="contact.html" class="btn btn-secondary">
+                            <i class="fas fa-envelope"></i>
+                            <span class="lang-text" data-key="contact_us">پەیوەندیمان پێوە بکە</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <footer class="footer" style="width: 100%; border-radius: 0;">
+                <p class="lang-text" data-key="copyright">© 2026 سیستەمی شوێنە گەشتیاریەکانی کوردستان. هەموو مافەکان
+                    پارێزراون.</p>
+                <div class="footer-links">
+                    <a href="about.html" class="footer-link lang-text" data-key="about">دەربارە</a>
+                    <a href="contact.html" class="footer-link lang-text" data-key="contact">پەیوەندی</a>
+                    <a href="privacy.html" class="footer-link lang-text" data-key="privacy">تایبەتمەندی</a>
+                    <a href="admin.php" class="footer-link lang-text" data-key="admin_panel">سەرەکی</a>
+                </div>
+            </footer>
+        </div>
+    </div>
+
+    <script>
+        // Language data for about page
+        const aboutLanguageData = {
+            ku: {
+                app_title: 'شوێنە گەشتیاریەکانی کوردستان',
+                app_subtitle: 'نەخشەی شوێنە گەشتیاریەکانی کوردستان',
+                about_title: 'دەربارەی ئێمە',
+                about_desc1: 'بەخێربێن بۆ سیستەمی شوێنە گەشتیاریەکانی کوردستان. ئەم پڕۆژەیە هەوڵێکە بۆ ناساندنی ڕووداوە سروشتی و مێژووییەکانی کوردستان لە ڕێگەی نەخشەیەکی ئینتەرنێتییەوە.',
+                about_desc2: 'ئێمە تیمیەکی گەشتیاری و تەکنەلۆژیا بین کە هەوڵ دەدەین شوێنە سەرنجڕاکێشەکانی کوردستان بە شێوەیەکی ئاسان و خێرا بە هەموو کەسێک بگەیەنین. ئامانجمان ئەوەیە کە گەشتیاران و خەڵکی ناوچەکە بتوانن زانیاری ورد و دروست لەسەر شوێنە گەشتیاریەکان بەدەست بهێنن.',
+                our_features: 'تایبەتمەندیەکانی سیستەم',
+                feature1_title: 'نەخشەی ئینتەرنێتی',
+                feature1_desc: 'نەخشەیەکی زیندوو کە هەموو شوێنە گەشتیاریەکانی کوردستان لەخۆ دەگرێت.',
+                feature2_title: 'زانیاری ورد',
+                feature2_desc: 'زانیاری تەواو لەسەر هەر شوێنێک وەک مێژوو، شوێن، و وێنە.',
+                feature3_title: 'سێ زمان',
+                feature3_desc: 'سیستەمەکە بە سێ زمان (کوردی، ئینگلیزی، عەرەبی) بەردەستە.',
+                feature4_title: 'هاوسەنگی لەگەڵ مۆبایل',
+                feature4_desc: 'سیستەمەکە بە باشی لەسەر مۆبایل و تابلێت کار دەکات.',
+                mission_title: 'ئامانج و بینیمان',
+                mission_goal: 'ئامانجی سەرەکی',
+                mission_desc1: 'ئامانجی سەرەکی ئێمە پەرەپێدانی گەشتیاری لە کوردستانە و یارمەتیدانی گەشتیاران بۆ دۆزینەوەی شوێنە سەرنجڕاکێشەکان.',
+                mission_vision: 'بینیمان',
+                mission_desc2: 'ئێمە باوەڕمان وایە کە کوردستان زەوییەکی پڕ لە ڕووداوە سروشتی و مێژووییە کە پێویستی بە ناساندنی زیاتر هەیە. لەڕێگەی ئەم پڕۆژەیەوە، هەوڵ دەدەین ئەم شوێنانە بە جیهان بناسێنین.',
+                team_title: 'تیمەکەمان',
+                team_desc: 'ئێمە تیمیەکی پڕۆفیشناڵین کە لە بوارە جیاوازەکان کاریان دەکات و هەوڵ دەدەین باشترین خزمەتگوزاری پێشکەش بکەین.',
+                ready_to_explore: 'ئامادەیت بۆ گەشتکردن؟',
+                cta_desc: 'دەست بکە بە گەشتکردن لە ڕووداوە سەرنجڕاکێشەکانی کوردستان. نەخشەکەمان بکەرەوە و شوێنەکە بدۆزەوە!',
+                explore_map: 'نەخشەکە ببینە',
+                contact_us: 'پەیوەندیمان پێوە بکە',
+                back_to_home: 'گەڕانەوە بۆ سەرەکی',
+                copyright: '© 2026 سیستەمی شوێنە گەشتیاریەکانی کوردستان. هەموو مافەکان پارێزراون.',
+                about: 'دەربارە',
+                contact: 'پەیوەندی',
+                privacy: 'تایبەتمەندی',
+                admin_panel: 'پانێلی بەڕێوەبەری'
+            },
+            en: {
+                app_title: 'Kurdish Tourism Locations',
+                app_subtitle: 'Kurdish Tourism Locations Map',
+                about_title: 'About Us',
+                about_desc1: 'Welcome to the Kurdish Tourism Locations System. This project is an effort to introduce the natural and historical attractions of Kurdistan through an interactive map.',
+                about_desc2: 'We are a team of tourism and technology professionals working to make Kurdistan\'s fascinating locations accessible to everyone quickly and easily. Our goal is to help tourists and locals get accurate and detailed information about tourism locations.',
+                our_features: 'System Features',
+                feature1_title: 'Interactive Map',
+                feature1_desc: 'A live map that includes all tourism locations in Kurdistan.',
+                feature2_title: 'Detailed Information',
+                feature2_desc: 'Complete information about each location including history, location, and photos.',
+                feature3_title: 'Three Languages',
+                feature3_desc: 'The system is available in three languages (Kurdish, English, Arabic).',
+                feature4_title: 'Mobile Responsive',
+                feature4_desc: 'The system works perfectly on mobile and tablet devices.',
+                mission_title: 'Our Mission & Vision',
+                mission_goal: 'Main Goal',
+                mission_desc1: 'Our main goal is to develop tourism in Kurdistan and help tourists discover fascinating locations.',
+                mission_vision: 'Our Vision',
+                mission_desc2: 'We believe Kurdistan is a land full of natural and historical attractions that need more recognition. Through this project, we aim to introduce these locations to the world.',
+                team_title: 'Our Team',
+                team_desc: 'We are a professional team working in different fields and striving to provide the best service.',
+                ready_to_explore: 'Ready to Explore?',
+                cta_desc: 'Start exploring the fascinating attractions of Kurdistan. Open our map and discover the locations!',
+                explore_map: 'View the Map',
+                contact_us: 'Contact Us',
+                back_to_home: 'Back to Home',
+                copyright: '© 2026 Kurdish Tourism Locations System. All rights reserved.',
+                about: 'About',
+                contact: 'Contact',
+                privacy: 'Privacy',
+                admin_panel: 'Home'
+            },
+            ar: {
+                app_title: 'مواقع السياحة الكردية',
+                app_subtitle: 'خريطة مواقع السياحة الكردية',
+                about_title: 'معلومات عنا',
+                about_desc1: 'مرحبًا بكم في نظام مواقع السياحة الكردية. هذا المشروع هو جهد لتقديم المعالم الطبيعية والتاريخية في كردستان من خلال خريطة تفاعلية.',
+                about_desc2: 'نحن فريق من محترفي السياحة والتكنولوجيا نعمل على جعل المواقع الرائعة في كردستان في متناول الجميع بسرعة وسهولة. هدفنا هو مساعدة السياح والسكان المحليين في الحصول على معلومات دقيقة ومفصلة عن المواقع السياحية.',
+                our_features: 'مميزات النظام',
+                feature1_title: 'خريطة تفاعلية',
+                feature1_desc: 'خريطة حية تشمل جميع المواقع السياحية في كردستان.',
+                feature2_title: 'معلومات مفصلة',
+                feature2_desc: 'معلومات كاملة عن كل موقع بما في ذلك التاريخ والموقع والصور.',
+                feature3_title: 'ثلاث لغات',
+                feature3_desc: 'النظام متوفر بثلاث لغات (الكردية، الإنجليزية، العربية).',
+                feature4_title: 'متجاوب مع الجوال',
+                feature4_desc: 'النظام يعمل بشكل مثالي على أجهزة الجوال والتابلت.',
+                mission_title: 'مهمتنا ورؤيتنا',
+                mission_goal: 'الهدف الرئيسي',
+                mission_desc1: 'هدفنا الرئيسي هو تطوير السياحة في كردستان ومساعدة السياح في اكتشاف المواقع الرائعة.',
+                mission_vision: 'رؤيتنا',
+                mission_desc2: 'نحن نؤمن أن كردستان أرض مليئة بالمعالم الطبيعية والتاريخية التي تحتاج إلى مزيد من التعريف. من خلال هذا المشروع، نهدف إلى تعريف العالم بهذه المواقع.',
+                team_title: 'فريقنا',
+                team_desc: 'نحن فريق محترف يعمل في مجالات مختلفة ونسعى لتقديم أفضل خدمة.',
+                ready_to_explore: 'مستعد للاستكشاف؟',
+                cta_desc: 'ابدأ استكشاف المعالم الرائعة في كردستان. افتح خريطتنا واكتشف المواقع!',
+                explore_map: 'عرض الخريطة',
+                contact_us: 'اتصل بنا',
+                back_to_home: 'العودة إلى الرئيسية',
+                copyright: '© 2026 نظام مواقع السياحة الكردية. جميع الحقوق محفوظة.',
+                about: 'حول',
+                contact: 'اتصل بنا',
+                privacy: 'الخصوصية',
+                admin_panel: 'الرئيسية'
+            }
+        };
+
+        // Simple language switching for about page
+        function changeLanguage(lang) {
+            localStorage.setItem('tourism_language', lang);
+            document.querySelectorAll('.lang-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.dataset.lang === lang) btn.classList.add('active');
+            });
+
+            // Update document direction
+            document.documentElement.lang = lang;
+            document.documentElement.dir = lang === 'en' ? 'ltr' : 'rtl';
+
+            // Update all elements with data-key
+            document.querySelectorAll('[data-key]').forEach(element => {
+                const key = element.getAttribute('data-key');
+                if (aboutLanguageData[lang] && aboutLanguageData[lang][key]) {
+                    element.textContent = aboutLanguageData[lang][key];
+                }
+            });
+
+            // Update placeholders if any
+            const searchInput = document.getElementById('search-input');
+            if (searchInput) {
+                searchInput.placeholder = lang === 'ku' ? 'گەڕان بەناوی شوێنەکان...' :
+                    lang === 'en' ? 'Search by location name...' :
+                        'البحث باسم الموقع...';
+            }
+        }
+
+        // Theme toggle
+        document.getElementById('theme-toggle').addEventListener('click', function () {
+            document.body.classList.toggle('light-mode');
+            const isLight = document.body.classList.contains('light-mode');
+            localStorage.setItem('tourism_theme', isLight ? 'light' : 'dark');
+            const icon = this.querySelector('i');
+            if (isLight) {
+                icon.classList.remove('fa-moon');
+                icon.classList.add('fa-sun');
+            } else {
+                icon.classList.remove('fa-sun');
+                icon.classList.add('fa-moon');
+            }
+        });
+
+        // Initialize language
+        document.addEventListener('DOMContentLoaded', function () {
+            // Load language
+            const savedLang = localStorage.getItem('tourism_language') || 'ku';
+            changeLanguage(savedLang);
+
+            // Load theme
+            const savedTheme = localStorage.getItem('tourism_theme') || 'dark';
+            if (savedTheme === 'light') {
+                document.body.classList.add('light-mode');
+                const themeIcon = document.querySelector('#theme-toggle i');
+                if (themeIcon) {
+                    themeIcon.classList.remove('fa-moon');
+                    themeIcon.classList.add('fa-sun');
+                }
+            }
+        });
+    </script>
+</body>
+
+</html>

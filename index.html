@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="ku" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description"
+        content="نەخشەی شوێنە گەشتیاریەکانی کوردستان - Kurdish Tourism Locations Map - خزمەتگوزاریەکی ئینتەرنێتی بۆ دۆزینەوە و ناسینی شوێنە گەشتیاریەکانی کوردستان">
+    <title>شوێنە گەشتیاریەکانی کوردستان - Kurdish Tourism Locations</title>
+
+    <!-- Leaflet CSS & JS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <!-- Leaflet Routing Machine -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.css" />
+    <script src="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.js"></script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Fonts for Kurdish, Arabic, and English -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+
+    <!-- Prevent Caching -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+
+    <link rel="stylesheet" href="assets/css/style.css?v=42.0">
+    <link rel="stylesheet" href="assets/css/pages.css?v=42.0">
+    <link rel="stylesheet" href="assets/css/enhanced_features.css?v=1.0">
+    <link rel="stylesheet" href="assets/css/ai_social_features.css?v=1.0">
+
+</head>
+
+<body class="map-page">
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo">
+                <div class="logo-icon"><a href="index.html" style="text-decoration: none;"><i
+                            class="fas fa-mountain"></i></a></div>
+                <div>
+                    <h1><span class="kurdish lang-text" data-key="app_title">شوێنە گەشتیاریەکانی کوردستان</span></h1>
+                    <p class="english lang-text" data-key="app_subtitle">Kurdish Tourism Locations Map</p>
+                </div>
+            </div>
+            <div class="header-actions">
+                <div class="language-switcher">
+                    <button class="lang-btn active" data-lang="ku" onclick="changeLanguage('ku')">کوردی</button>
+                    <button class="lang-btn" data-lang="en" onclick="changeLanguage('en')">English</button>
+                    <button class="lang-btn" data-lang="ar" onclick="changeLanguage('ar')">العربية</button>
+                </div>
+                <button class="icon-btn" id="theme-toggle" type="button" aria-label="Toggle theme">
+                    <i class="fas fa-moon"></i>
+                </button>
+                <!-- Mobile Menu Button in Header -->
+                <button class="icon-btn" id="header-menu-btn" onclick="toggleSidebar()" aria-label="Menu"
+                    style="background: linear-gradient(135deg, #f59e0b, #ef4444); color: white; border: none; width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 4px 10px rgba(245, 158, 11, 0.4);">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <button class="icon-btn" id="user-account-btn" onclick="handleUserAccount()" aria-label="User Account" style="background: linear-gradient(135deg, #10b981, #3b82f6); color: white; border: none; width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 4px 10px rgba(16, 185, 129, 0.4); margin-right: 5px;">
+                    <i class="fas fa-user"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Sidebar -->
+            <aside class="sidebar" id="sidebar">
+                <section class="search-section" aria-label="Search locations">
+                    <div class="search-box" style="border-radius: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border: 1px solid #eee; overflow: hidden; transition: all 0.3s ease;">
+                        <i class="fas fa-search" aria-hidden="true" style="margin-left: 10px; color: #667eea;"></i>
+                        <input id="search-input" type="search" autocomplete="off" placeholder="گەڕان بەناوی شوێنەکان..."
+                            aria-label="Search locations" style="border: none; padding: 12px 15px; width: 100%; outline: none; font-size: 0.95em;">
+                        <div class="search-actions" style="display: flex; align-items: center;">
+                            <button id="clear-search-btn" class="search-action-btn" type="button" aria-label="Clear search" title="پاککردنەوە" style="display: none; background: none; border: none; color: #94a3b8; padding: 0 8px; cursor: pointer; transition: color 0.2s;">
+                                <i class="fas fa-times"></i>
+                            </button>
+                            <button id="voice-search-btn" class="voice-search-btn" type="button" aria-label="Voice search" title="گەڕانی دەنگی" style="background: none; border: none; color: #667eea; padding: 0 15px; cursor: pointer; transition: transform 0.2s; position: relative;">
+                                <i class="fas fa-microphone"></i>
+                                <span class="voice-status" style="position: absolute; top: -5px; right: 5px; width: 8px; height: 8px; background: #ef4444; border-radius: 50%; display: none;"></span>
+                            </button>
+                        </div>
+                    </div>
+                    <div id="search-suggestions" class="search-suggestions" style="display: none; position: absolute; background: white; border: 1px solid #e2e8f0; border-radius: 12px; margin-top: 5px; width: 100%; max-height: 300px; overflow-y: auto; z-index: 1000; box-shadow: 0 10px 25px rgba(0,0,0,0.1);">
+                        <div class="suggestion-header" style="padding: 12px 15px; border-bottom: 1px solid #f1f5f9; font-size: 0.85em; color: #64748b; display: flex; justify-content: space-between; align-items: center;">
+                            <span>پێشنیارەکانی گەڕان</span>
+                            <button id="clear-history" style="background: none; border: none; color: #94a3b8; cursor: pointer; font-size: 0.8em;">پاککردنەوە</button>
+                        </div>
+                        <div id="suggestions-list" class="suggestions-list" style="padding: 8px 0;"></div>
+                        <div class="voice-help" style="padding: 12px 15px; border-top: 1px solid #f1f5f9; font-size: 0.85em; color: #64748b;">
+                            <i class="fas fa-microphone" style="margin-left: 5px;"></i>
+                            <span>بۆ گەڕانی دەنگی کلیک لەسەر میکرۆفۆنەکە بکە</span>
+                        </div>
+                    </div>
+                </section>
+                <!-- Government Filter -->
+                <div class="filter-section">
+                    <h3><i class="fas fa-landmark"></i> <span class="lang-text" data-key="government_filter">هەرێمەکان</span>
+                    </h3>
+                    <div class="government-filter" id="government-filter">
+                        <!-- Government buttons will be populated by JavaScript -->
+                    </div>
+                </div>
+                <div class="btn-group">
+                    <button class="btn btn-primary" id="locate-me">
+                        <i class="fas fa-location-arrow"></i> <span class="lang-text" data-key="locate_me">شوێنی من
+                            بدۆزە</span>
+                    </button>
+                </div>
+                <!-- Layer Controls -->
+                <div class="layer-section">
+                    <div class="section-title">
+                        <i class="fas fa-layer-group"></i>
+                        <span class="lang-text" data-key="map_layers">چینەکانی نەخشە</span>
+                    </div>
+                    <div class="layer-controls">
+                        <div class="layer-item">
+                            <div class="layer-info">
+                                <div class="layer-color" style="background-color: #4a6fa5;"></div>
+                                <div class="layer-name"><span class="lang-text" data-key="street_map">نەخشەی
+                                        شەقام</span></div>
+                            </div>
+                            <label class="layer-toggle">
+                                <input type="checkbox" id="streets-layer" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+
+                        <div class="layer-item">
+                            <div class="layer-info">
+                                <div class="layer-color" style="background-color: #2ecc71;"></div>
+                                <div class="layer-name"><span class="lang-text" data-key="satellite">هەسارەیی</span>
+                                </div>
+                            </div>
+                            <label class="layer-toggle">
+                                <input type="checkbox" id="satellite-layer">
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+
+                        <div class="layer-item">
+                            <div class="layer-info">
+                                <div class="layer-color" style="background-color: #d35400;"></div>
+                                <div class="layer-name"><span class="lang-text" data-key="topography">تۆپۆگرافی</span>
+                                </div>
+                            </div>
+                            <label class="layer-toggle">
+                                <input type="checkbox" id="topo-layer">
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Category Filter -->
+                <div class="filter-section">
+                    <h3><i class="fas fa-filter"></i> <span class="lang-text" data-key="category_filter">جۆرەکان</span>
+                    </h3>
+                    <div class="category-filter" id="category-filter">
+                        <!-- Category buttons will be populated by JavaScript -->
+                    </div>
+                </div>
+
+                <!-- Weather Information -->
+                <div class="weather-section">
+                    <div class="section-title">
+                        <i class="fas fa-cloud-sun"></i>
+                        <span class="lang-text" data-key="weather">کەشوهەوا</span>
+                    </div>
+                    <div class="weather-info" id="weather-info">
+                        <div class="weather-loading">
+                            <i class="fas fa-spinner fa-spin"></i>
+                            <span>دەستکاریکردنی زانیاری کەشوهەوا...</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="features-section" style="background: #f8f9fa; border-radius: 15px; padding: 15px; margin-top: 20px; border: 1px solid #edf2f7;">
+                    <div class="section-title" style="margin-bottom: 15px; color: #4a5568; font-weight: 700;">
+                        <i class="fas fa-star" style="color: #ecc94b;"></i>
+                        <span class="lang-text" data-key="features">تایبەتمەندیە نوێیەکان</span>
+                    </div>
+                    <div class="feature-buttons" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;">
+                        <button class="feature-btn" onclick="openARCamera()" title="بینینی AR" style="display: flex; flex-direction: column; align-items: center; gap: 5px; padding: 10px; border-radius: 10px; background: white; border: 1px solid #e2e8f0; transition: all 0.2s;">
+                            <i class="fas fa-camera" style="color: #4299e1;"></i>
+                            <span style="font-size: 0.75em; font-weight: 500;">AR Camera</span>
+                        </button>
+                        <button class="feature-btn" onclick="openMyTrips()" title="گەشتەکانم" style="display: flex; flex-direction: column; align-items: center; gap: 5px; padding: 10px; border-radius: 10px; background: white; border: 1px solid #e2e8f0; transition: all 0.2s;">
+                            <i class="fas fa-route" style="color: #ed64a6;"></i>
+                            <span style="font-size: 0.75em; font-weight: 500;">گەشتەکانم</span>
+                        </button>
+                        <button class="feature-btn" onclick="openBusinessDirectory()" title="بازرگانی" style="display: flex; flex-direction: column; align-items: center; gap: 5px; padding: 10px; border-radius: 10px; background: white; border: 1px solid #e2e8f0; transition: all 0.2s;">
+                            <i class="fas fa-store" style="color: #48bb78;"></i>
+                            <span style="font-size: 0.75em; font-weight: 500;">بازرگانی</span>
+                        </button>
+                        <button class="feature-btn" onclick="openEventCalendar()" title="رووداوەکان" style="display: flex; flex-direction: column; align-items: center; gap: 5px; padding: 10px; border-radius: 10px; background: white; border: 1px solid #e2e8f0; transition: all 0.2s;">
+                            <i class="fas fa-calendar-alt" style="color: #f6ad55;"></i>
+                            <span style="font-size: 0.75em; font-weight: 500;">رووداوەکان</span>
+                        </button>
+                        <button class="feature-btn" onclick="toggleOfflineMode()" title="دۆستی بەدەست" style="display: flex; flex-direction: column; align-items: center; gap: 5px; padding: 10px; border-radius: 10px; background: white; border: 1px solid #e2e8f0; transition: all 0.2s;">
+                            <i class="fas fa-download" style="color: #a0aec0;"></i>
+                            <span style="font-size: 0.75em; font-weight: 500;">Offline</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="action-buttons" style="display: grid; grid-template-columns: 1fr; gap: 10px; margin-top: 20px;">
+                    <button class="action-btn clear-btn" onclick="clearFilters()" style="padding: 12px; border-radius: 12px; background: #e53e3e; color: white; border: none; font-weight: 600; cursor: pointer; transition: all 0.3s; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                        <i class="fas fa-trash-alt"></i>
+                        <span class="lang-text" data-key="clear_all">سڕینەوەی هەموو</span>
+                    </button>
+                    <button class="action-btn" onclick="resetToDuhok()" style="padding: 12px; border-radius: 12px; background: #667eea; color: white; border: none; font-weight: 600; cursor: pointer; transition: all 0.3s; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                        <i class="fas fa-crosshairs"></i>
+                        <span class="lang-text" data-key="focus_duhok">دهۆک نیشان بدە</span>
+                    </button>
+                </div>
+
+                <!-- AI Recommendations -->
+                <div class="recommendations-section">
+                    <div class="recommendations-header">
+                        <h3><i class="fas fa-magic"></i> پێشنیازەکانی بۆ تۆ</h3>
+                        <button onclick="const _ai=initAIRecommendations(); if(_ai&&typeof _ai.initPreferenceCollection==='function') _ai.initPreferenceCollection();" class="btn btn-sm btn-secondary">
+                            <i class="fas fa-cog"></i> ڕێکخستن
+                        </button>
+                    </div>
+                    <div class="recommendations-tabs">
+                        <button class="recommendations-tab active" onclick="showRecommendationTab('personal', this)">شخصی</button>
+                        <button class="recommendations-tab" onclick="showRecommendationTab('trending', this)">هەرەمەکان</button>
+                        <button class="recommendations-tab" onclick="showRecommendationTab('hidden', this)">دۆزینەوەکان</button>
+                    </div>
+                    <div class="recommendations-container" id="recommendations-container">
+                        <div class="recommendations-loading">
+                            <i class="fas fa-spinner fa-spin"></i>
+                            <span>دەستکاریکردنی پێشنیازەکان...</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Social Sharing -->
+                <div class="social-sharing" id="social-sharing">
+                    <h4>هاوبەشکردنی شوێن</h4>
+                    <div class="share-buttons">
+                        <button onclick="socialSharing.shareOnFacebook()" class="share-btn facebook" title="Share on Facebook">
+                            <i class="fab fa-facebook-f"></i>
+                        </button>
+                        <button onclick="socialSharing.shareOnTwitter()" class="share-btn twitter" title="Share on Twitter">
+                            <i class="fab fa-twitter"></i>
+                        </button>
+                        <button onclick="socialSharing.shareOnInstagram()" class="share-btn instagram" title="Share on Instagram">
+                            <i class="fab fa-instagram"></i>
+                        </button>
+                        <button onclick="socialSharing.shareOnWhatsApp()" class="share-btn whatsapp" title="Share on WhatsApp">
+                            <i class="fab fa-whatsapp"></i>
+                        </button>
+                        <button onclick="socialSharing.copyLink()" class="share-btn copy" title="Copy Link">
+                            <i class="fas fa-link"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Locations List -->
+                <div class="locations-list" id="locations-list">
+                    <h3><i class="fas fa-map-pin"></i> <span class="lang-text" data-key="locations">شوێنەکان</span>
+                        (<span id="location-count">0</span>)</h3>
+                    <!-- Location items will be populated by JavaScript -->
+                </div>
+            </aside>
+
+            <!-- Map Container -->
+            <div class="map-container">
+                <!-- Sidebar Toggle Button -->
+                <button class="sidebar-toggle" id="sidebar-toggle" onclick="toggleSidebar()">
+                    <i class="fas fa-times"></i>
+                </button>
+                <div id="map"></div>
+                <div id="page-content" class="page-content" hidden>
+                    <div class="page-header">
+                        <button class="page-back-btn" onclick="showMap()">
+                            <i class="fas fa-arrow-left"></i>
+                            <span class="lang-text" data-key="back_to_map">گەڕانەوە بۆ نەخشە</span>
+                        </button>
+                        <h2 id="page-title"></h2>
+                    </div>
+                    <div class="page-body" id="page-body"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p class="lang-text" data-key="copyright">© 2026 سیستەمی شوێنە گەشتیاریەکانی کوردستان. هەموو مافەکان
+                پارێزراون.</p>
+            <div class="footer-links">
+                <a href="pages/about.html" class="footer-link lang-text page-link" data-key="about"
+                    data-page="about">دەربارە</a>
+                <a href="pages/contact.html" class="footer-link lang-text page-link" data-key="contact"
+                    data-page="contact">پەیوەندی</a>
+                <a href="pages/privacy.html" class="footer-link lang-text page-link" data-key="privacy"
+                    data-page="privacy">تایبەتمەندی</a>
+                <a href="pages/index.html" class="footer-link lang-text" data-key="admin_panel">سەرەکی</a>
+            </div>
+        </footer>
+    </div>
+
+    <div class="app-modal" id="app-modal" hidden>
+        <div class="app-modal__backdrop" data-modal-close></div>
+        <div class="app-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="app-modal-title">
+            <button class="app-modal__close" id="app-modal-close" type="button" aria-label="Close">
+                <i class="fas fa-times"></i>
+            </button>
+            <div class="app-modal__header">
+                <h2 class="app-modal__title" id="app-modal-title"></h2>
+            </div>
+            <div class="app-modal__body" id="app-modal-body"></div>
+            <div class="app-modal__footer" id="app-modal-footer"></div>
+        </div>
+    </div>
+
+    <script src="assets/js/script.js"></script>
+<script src="assets/js/ai_recommendations.js"></script>
+<script src="assets/js/social_sharing.js"></script>
+</body>
+
+</html>

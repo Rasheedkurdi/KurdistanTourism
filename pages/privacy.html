@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="ku" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تایبەتمەندی - شوێنە گەشتیاریەکانی کوردستان</title>
+
+    <!-- Leaflet CSS & JS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Fonts for Kurdish, Arabic, and English -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+
+    <link rel="stylesheet" href="../assets/css/style.css?v=13.0">
+    <link rel="stylesheet" href="../assets/css/pages.css?v=13.0">
+</head>
+
+<body class="content-page" style="color: rgb(27, 27, 205);">
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo">
+                <div class="logo-icon"><a href="../index.html" style="text-decoration: none;">🏔️</a></div>
+                <div>
+                    <h1><span class="kurdish lang-text" data-key="app_title">شوێنە گەشتیاریەکانی کوردستان</span></h1>
+                    <p class="english lang-text" data-key="app_subtitle">Kurdish Tourism Locations Map</p>
+                </div>
+            </div>
+            <div class="header-actions">
+                <div class="language-switcher">
+                    <button class="lang-btn active" data-lang="ku" onclick="changeLanguage('ku')">کوردی</button>
+                    <button class="lang-btn" data-lang="en" onclick="changeLanguage('en')">English</button>
+                    <button class="lang-btn" data-lang="ar" onclick="changeLanguage('ar')">العربية</button>
+                </div>
+                <button class="icon-btn" id="theme-toggle" type="button" aria-label="Toggle theme">
+                    <i class="fas fa-moon"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="privacy-content">
+                <div class="privacy-section">
+                    <h2 class="lang-text" data-key="privacy_title">ڕێنمایی تایبەتمەندی</h2>
+                    <p class="lang-text" data-key="privacy_intro1">بەخێربێن بۆ ڕێنمایی تایبەتمەندی سیستەمی شوێنە
+                        گەشتیاریەکانی کوردستان. ئێمە گرنگی زۆر دەدەین بە پاراستنی زانیاری تایبەتی و پاراستنی هەموو
+                        بەکارهێنەرەکانمان.</p>
+                    <p class="lang-text" data-key="privacy_intro2">ئەم ڕێنماییە ڕوون دەکاتەوە کە چۆن زانیاریەکانت
+                        کۆدەکەینەوە، بەکاریان دەهێنین، دەیپارێزین و هاوبەشیان دەکەین. تکایە ئەم ڕێنماییە بە وردی
+                        بخوێنەوە پێش ئەوەی سیستەمەکەمان بەکاربهێنیت.</p>
+
+                    <div class="highlight-box">
+                        <p><strong class="lang-text" data-key="privacy_note_title">تێبینی:</strong> <span class="lang-text" data-key="privacy_note_desc">بە بەکارهێنانی ئەم سیستەمە، تۆ ڕازیت بە مەرجەکانی ئەم ڕێنماییە.
+                            ئەگەر ڕازی نەبیت، تکایە سیستەمەکە بەکارمههێنە.</span></p>
+                    </div>
+                </div>
+
+                <div class="privacy-section">
+                    <h3 class="lang-text" data-key="data_collection_title">زانیاریەکانی کۆکردنەوە</h3>
+                    <p class="lang-text" data-key="data_collection_desc">ئێمە زانیاریەکانی خوارەوە کۆدەکەینەوە:</p>
+                    <ul>
+                        <li class="lang-text" data-key="data_item1">زانیاری ناونیشانی IP و وێبگەڕ</li>
+                        <li class="lang-text" data-key="data_item2">زانیاری شوێنی جیۆگرافی (ئەگەر ڕێگەت پێدرابێت)</li>
+                        <li class="lang-text" data-key="data_item3">زانیاری ناوەڕۆکی بینراوی نەخشە و شوێنەکان</li>
+                        <li class="lang-text" data-key="data_item4">زانیاری زمان و ڕەنگی هەڵبژاردە</li>
+                        <li class="lang-text" data-key="data_item5">زانیاری ئیمەیڵ و ناو (تەنها لە کاتی پەیوەندیدا)</li>
+                    </ul>
+
+                    <h3 class="lang-text" data-key="data_use_title">بەکارهێنانی زانیاریەکان</h3>
+                    <p class="lang-text" data-key="data_use_desc">ئێمە زانیاریەکانت بەم شێوازانە بەکاردەهێنین:</p>
+                    <ol>
+                        <li class="lang-text" data-key="use_item1">باشترکردنی خزمەتگوزاریەکانمان</li>
+                        <li class="lang-text" data-key="use_item2">پێشکەشکردنی نەخشە و زانیاری شوێنەکان</li>
+                        <li class="lang-text" data-key="use_item3">وەڵامدانەوەی پرسیارەکانت</li>
+                        <li class="lang-text" data-key="use_item4">ناسینی بابەتەکانی بەلاوە</li>
+                        <li class="lang-text" data-key="use_item5">پاراستنی سیستەمەکە لە هێرش</li>
+                    </ol>
+                </div>
+
+                <div class="privacy-section">
+                    <h3 class="lang-text" data-key="cookies_title">کۆکیەکان (Cookies)</h3>
+                    <p class="lang-text" data-key="cookies_desc1">ئێمە کۆکی بەکاردەهێنین بۆ باشترکردنی ئەزموونی
+                        بەکارهێنەر. کۆکیەکان فایلە بچووکەکانن کە لەسەر کۆمپیوتەرەکەت دەگیرێن و یارمەتیمان دەدەن تۆ
+                        بەناوبانگ بکەین و هەڵسەنگاندنەکانت بیربمێنینەوە.</p>
+                    <p class="lang-text" data-key="cookies_desc2">تۆ دەتوانیت ڕێگە بە کۆکیەکان بدەیت یان نا، بەڵام
+                        نەهێشتنی هەندێک کۆکی دەکرێت کاریگەری لەسەر کارکردنی سیستەمەکەمان هەبێت.</p>
+
+                    <h3 class="lang-text" data-key="third_party_title">هاوبەشی لەگەڵ کەسانی تر</h3>
+                    <p class="lang-text" data-key="third_party_desc">ئێمە زانیاریەکانی تایبەتی تۆ هاوبەش ناکەین لەگەڵ
+                        کەسانی تر جگە لەو حاڵەتانەی خوارەوە:</p>
+                    <ul>
+                        <li class="lang-text" data-key="share_item1">کاتێک یاسا پێویستی بەوە بکات</li>
+                        <li class="lang-text" data-key="share_item2">بۆ پاراستنی مافەکانی ئێمە یان پاراستنی ئەمنی</li>
+                        <li class="lang-text" data-key="share_item3">لەگەڵ یاریدەدەرەکانی پێویست کە ڕێککەوتنی پاراستنیان
+                            لەگەڵماندا هەیە</li>
+                    </ul>
+                </div>
+
+                <div class="privacy-section">
+                    <h3 class="lang-text" data-key="security_title">پاراستن</h3>
+                    <p class="lang-text" data-key="security_desc">ئێمە هەوڵی باشترین پاراستن دەدەین بۆ زانیاریەکانت.
+                        هەموو زانیاریەکان بە شێوەیەکی پارێزراو گواستراوەتەوە و پارێزراوە لە دەستدرێژی.</p>
+
+                    <h3 class="lang-text" data-key="rights_title">مافەکانی تۆ</h3>
+                    <p class="lang-text" data-key="rights_desc">تۆ مافی ئەوت:</p>
+                    <ul>
+                        <li class="lang-text" data-key="right_item1">دەستگەیشتن بە زانیاریەکانت</li>
+                        <li class="lang-text" data-key="right_item2">داوای چاککردنی زانیاریە هەڵەکان</li>
+                        <li class="lang-text" data-key="right_item3">داوای سڕینەوەی زانیاریەکانت</li>
+                        <li class="lang-text" data-key="right_item4">ڕەتکردنەوەی کۆکردنەوەی زانیاری</li>
+                        <li class="lang-text" data-key="right_item5">گواستنەوەی زانیاریەکانت</li>
+                    </ul>
+
+                    <p class="lang-text" data-key="rights_contact">بۆ بەکارهێنانی ئەم مافانە، تکایە پەیوەندیمان پێوە بکە
+                        لە ڕێگەی <a href="contact.html">پەڕەی پەیوەندی</a>.</p>
+                </div>
+
+                <div class="privacy-section">
+                    <h3 class="lang-text" data-key="changes_title">گۆڕانکاریەکان</h3>
+                    <p class="lang-text" data-key="changes_desc">ئێمە مافی خۆمان هەڵگرتووە بۆ گۆڕینی ئەم ڕێنماییە لە هەر
+                        کاتێکدا. گۆڕانکاریەکان ڕاستەوخۆ لەسەر ئەم پەڕەیە دەردەکەون و بەکارهێنەرەکان ئاگادار دەکرێنەوە.
+                    </p>
+
+                    <div class="update-date">
+                        <p class="lang-text" data-key="last_updated">دوایین نوێکردنەوە: ٢٩ی نیسانی ٢٠٢٦</p>
+                    </div>
+                </div>
+
+                <a href="../index.html" class="back-button lang-text" data-key="back_to_home">گەڕانەوە بۆ سەرەکی</a>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="footer" style="width: 100%; border-radius: 0;">
+            <p class="lang-text" data-key="copyright">© 2026 سیستەمی شوێنە گەشتیاریەکانی کوردستان. هەموو مافەکان
+                پارێزراون.</p>
+            <div class="footer-links">
+                <a href="about.html" class="footer-link lang-text" data-key="about">دەربارە</a>
+                <a href="contact.html" class="footer-link lang-text" data-key="contact">پەیوەندی</a>
+                <a href="privacy.html" class="footer-link lang-text" data-key="privacy">تایبەتمەندی</a>
+                <a href="admin.php" class="footer-link lang-text" data-key="admin_panel">پانێلی بەڕێوەبەری</a>
+            </div>
+        </footer>
+    </div>
+    </div>
+
+    <script>
+        // Language data for privacy page
+        const privacyLanguageData = {
+            ku: {
+                app_title: 'شوێنە گەشتیاریەکانی کوردستان',
+                app_subtitle: 'نەخشەی شوێنە گەشتیاریەکانی کوردستان',
+                privacy_title: 'ڕێنمایی تایبەتمەندی',
+                privacy_intro1: 'بەخێربێن بۆ ڕێنمایی تایبەتمەندی سیستەمی شوێنە گەشتیاریەکانی کوردستان. ئێمە گرنگی زۆر دەدەین بە پاراستنی زانیاری تایبەتی و پاراستنی هەموو بەکارهێنەرەکانمان.',
+                privacy_intro2: 'ئەم ڕێنماییە ڕوون دەکاتەوە کە چۆن زانیاریەکانت کۆدەکەینەوە، بەکاریان دەهێنین، دەیپارێزین و هاوبەشیان دەکەین. تکایە ئەم ڕێنماییە بە وردی بخوێنەوە پێش ئەوەی سیستەمەکەمان بەکاربهێنیت.',
+                privacy_note_title: 'تێبینی:',
+                privacy_note_desc: 'بە بەکارهێنانی ئەم سیستەمە، تۆ ڕازیت بە مەرجەکانی ئەم ڕێنماییە. ئەگەر ڕازی نەبیت، تکایە سیستەمەکە بەکارمههێنە.',
+                data_collection_title: 'زانیاریەکانی کۆکردنەوە',
+                data_collection_desc: 'ئێمە زانیاریەکانی خوارەوە کۆدەکەینەوە:',
+                data_item1: 'زانیاری ناونیشانی IP و وێبگەڕ',
+                data_item2: 'زانیاری شوێنی جیۆگرافی (ئەگەر ڕێگەت پێدرابێت)',
+                data_item3: 'زانیاری ناوەڕۆکی بینراوی نەخشە و شوێنەکان',
+                data_item4: 'زانیاری زمان و ڕەنگی هەڵبژاردە',
+                data_item5: 'زانیاری ئیمەیڵ و ناو (تەنها لە کاتی پەیوەندیدا)',
+                data_use_title: 'بەکارهێنانی زانیاریەکان',
+                data_use_desc: 'ئێمە زانیاریەکانت بەم شێوازانە بەکاردەهێنین:',
+                use_item1: 'باشترکردنی خزمەتگوزاریەکانمان',
+                use_item2: 'پێشکەشکردنی نەخشە و زانیاری شوێنەکان',
+                use_item3: 'وەڵامدانەوەی پرسیارەکانت',
+                use_item4: 'ناسینی بابەتەکانی بەلاوە',
+                use_item5: 'پاراستنی سیستەمەکە لە هێرش',
+                cookies_title: 'کۆکیەکان (Cookies)',
+                cookies_desc1: 'ئێمە کۆکی بەکاردەهێنین بۆ باشترکردنی ئەزموونی بەکارهێنەر. کۆکیەکان فایلە بچووکەکانن کە لەسەر کۆمپیوتەرەکەت دەگیرێن و یارمەتیمان دەدەن تۆ بەناوبانگ بکەین و هەڵسەنگاندنەکانت بیربمێنینەوە.',
+                cookies_desc2: 'تۆ دەتوانیت ڕێگە بە کۆکیەکان بدەیت یان نا، بەڵام نەهێشتنی هەندێک کۆکی دەکرێت کاریگەری لەسەر کارکردنی سیستەمەکەمان هەبێت.',
+                third_party_title: 'هاوبەشی لەگەڵ کەسانی تر',
+                third_party_desc: 'ئێمە زانیاریەکانی تایبەتی تۆ هاوبەش ناکەین لەگەڵ کەسانی تر جگە لەو حاڵەتانەی خوارەوە:',
+                share_item1: 'کاتێک یاسا پێویستی بەوە بکات',
+                share_item2: 'بۆ پاراستنی مافەکانی ئێمە یان پاراستنی ئەمنی',
+                share_item3: 'لەگەڵ یاریدەدەرەکانی پێویست کە ڕێککەوتنی پاراستنیان لەگەڵماندا هەیە',
+                security_title: 'پاراستن',
+                security_desc: 'ئێمە هەوڵی باشترین پاراستن دەدەین بۆ زانیاریەکانت. هەموو زانیاریەکان بە شێوەیەکی پارێزراو گواستراوەتەوە و پارێزراوە لە دەستدرێژی.',
+                rights_title: 'مافەکانی تۆ',
+                rights_desc: 'تۆ مافی ئەوت:',
+                right_item1: 'دەستگەیشتن بە زانیاریەکانت',
+                right_item2: 'داوای چاککردنی زانیاریە هەڵەکان',
+                right_item3: 'داوای سڕینەوەی زانیاریەکانت',
+                right_item4: 'ڕەتکردنەوەی کۆکردنەوەی زانیاری',
+                right_item5: 'گواستنەوەی زانیاریەکانت',
+                rights_contact: 'بۆ بەکارهێنانی ئەم مافانە، تکایە پەیوەندیمان پێوە بکە لە ڕێگەی <a href="contact.html">پەڕەی پەیوەندی</a>.',
+                changes_title: 'گۆڕانکاریەکان',
+                changes_desc: 'ئێمە مافی خۆمان هەڵگرتووە بۆ گۆڕینی ئەم ڕێنماییە لە هەر کاتێکدا. گۆڕانکاریەکان ڕاستەوخۆ لەسەر ئەم پەڕەیە دەردەکەون و بەکارهێنەرەکان ئاگادار دەکرێنەوە.',
+                last_updated: 'دوایین نوێکردنەوە: ٢٩ی نیسانی ٢٠٢٦',
+                back_to_home: 'گەڕانەوە بۆ سەرەکی',
+                copyright: '© 2026 سیستەمی شوێنە گەشتیاریەکانی کوردستان. هەموو مافەکان پارێزراون.',
+                about: 'دەربارە',
+                contact: 'پەیوەندی',
+                privacy: 'تایبەتمەندی',
+                admin_panel: 'پانێلی بەڕێوەبەری'
+            },
+            en: {
+                app_title: 'Kurdish Tourism Locations',
+                app_subtitle: 'Kurdish Tourism Locations Map',
+                privacy_title: 'Privacy Policy',
+                privacy_intro1: 'Welcome to the Privacy Policy of the Kurdish Tourism Locations System. We place great importance on protecting personal information and safeguarding all our users.',
+                privacy_intro2: 'This policy explains how we collect, use, protect, and share your information. Please read this policy carefully before using our system.',
+                privacy_note_title: 'Note:',
+                privacy_note_desc: 'By using this system, you agree to the terms of this policy. If you do not agree, please do not use the system.',
+                data_collection_title: 'Information We Collect',
+                data_collection_desc: 'We collect the following information:',
+                data_item1: 'IP address and browser information',
+                data_item2: 'Geographic location information (if permitted)',
+                data_item3: 'Content viewed on maps and locations',
+                data_item4: 'Language and theme preferences',
+                data_item5: 'Email and name information (only during contact)',
+                data_use_title: 'How We Use Your Information',
+                data_use_desc: 'We use your information in the following ways:',
+                use_item1: 'Improving our services',
+                use_item2: 'Providing maps and location information',
+                use_item3: 'Responding to your inquiries',
+                use_item4: 'Understanding popular topics',
+                use_item5: 'Protecting the system from attacks',
+                cookies_title: 'Cookies',
+                cookies_desc1: 'We use cookies to improve user experience. Cookies are small files stored on your computer that help us recognize you and remember your preferences.',
+                cookies_desc2: 'You can allow or disallow cookies, but disabling some cookies may affect the functionality of our system.',
+                third_party_title: 'Sharing with Third Parties',
+                third_party_desc: 'We do not share your personal information with third parties except in the following cases:',
+                share_item1: 'When required by law',
+                share_item2: 'To protect our rights or ensure security',
+                share_item3: 'With necessary service providers who have confidentiality agreements with us',
+                security_title: 'Security',
+                security_desc: 'We strive to provide the best protection for your information. All information is transmitted securely and protected from unauthorized access.',
+                rights_title: 'Your Rights',
+                rights_desc: 'You have the right to:',
+                right_item1: 'Access your information',
+                right_item2: 'Request correction of incorrect information',
+                right_item3: 'Request deletion of your information',
+                right_item4: 'Opt-out of data collection',
+                right_item5: 'Transfer your information',
+                rights_contact: 'To exercise these rights, please contact us via the <a href="contact.html">contact page</a>.',
+                changes_title: 'Changes',
+                changes_desc: 'We reserve the right to change this policy at any time. Changes will appear directly on this page and users will be notified.',
+                last_updated: 'Last updated: April 29, 2026',
+                back_to_home: 'Back to Home',
+                copyright: '© 2026 Kurdish Tourism Locations System. All rights reserved.',
+                about: 'About',
+                contact: 'Contact',
+                privacy: 'Privacy',
+                admin_panel: 'Admin Panel'
+            },
+            ar: {
+                app_title: 'مواقع السياحة الكردية',
+                app_subtitle: 'خريطة مواقع السياحة الكردية',
+                privacy_title: 'سياسة الخصوصية',
+                privacy_intro1: 'مرحبًا بكم في سياسة الخصوصية لنظام مواقع السياحة الكردية. نولي أهمية كبيرة لحماية المعلومات الشخصية وحماية جميع مستخدمينا.',
+                privacy_intro2: 'توضح هذه السياسة كيفية جمع معلوماتك واستخدامها وحمايتها ومشاركتها. يرجى قراءة هذه السياسة بعناية قبل استخدام نظامنا.',
+                privacy_note_title: 'ملاحظة:',
+                privacy_note_desc: 'باستخدامك لهذا النظام، فإنك توافق على شروط هذه السياسة. إذا كنت لا توافق، يرجى عدم استخدام النظام.',
+                data_collection_title: 'المعلومات التي نجمعها',
+                data_collection_desc: 'نجمع المعلومات التالية:',
+                data_item1: 'عنوان IP ومعلومات المتصفح',
+                data_item2: 'معلومات الموقع الجغرافي (إذا سمحت بذلك)',
+                data_item3: 'المحتوى الذي تمت مشاهدته على الخرائط والمواقع',
+                data_item4: 'تفضيلات اللغة والسمة',
+                data_item5: 'معلومات البريد الإلكتروني والاسم (فقط أثناء الاتصال)',
+                data_use_title: 'كيف نستخدم معلوماتك',
+                data_use_desc: 'نستخدم معلوماتك بالطرق التالية:',
+                use_item1: 'تحسين خدماتنا',
+                use_item2: 'توفير الخرائط ومعلومات المواقع',
+                use_item3: 'الرد على استفساراتك',
+                use_item4: 'فهم الموضوعات الشائعة',
+                use_item5: 'حماية النظام من الهجمات',
+                cookies_title: 'ملفات تعريف الارتباط (الكوكيز)',
+                cookies_desc1: 'نستخدم ملفات تعريف الارتباط لتحسين تجربة المستخدم. ملفات تعريف الارتباط هي ملفات صغيرة يتم تخزينها على جهاز الكمبيوتر الخاص بك وتساعدنا في التعرف عليك وتذكر تفضيلاتك.',
+                cookies_desc2: 'يمكنك السماح بملفات تعريف الارتباط أو رفضها، ولكن تعطيل بعض ملفات تعريف الارتباط قد يؤثر على وظائف نظامنا.',
+                third_party_title: 'المشاركة مع أطراف ثالثة',
+                third_party_desc: 'نحن لا نشارك معلوماتك الشخصية مع أطراف ثالثة إلا في الحالات التالية:',
+                share_item1: 'عندما يقتضي القانون ذلك',
+                share_item2: 'لحماية حقوقنا أو ضمان الأمان',
+                share_item3: 'مع مقدمي الخدمات الضروريين الذين لديهم اتفاقيات سرية معنا',
+                security_title: 'الأمان',
+                security_desc: 'نسعى جاهدين لتوفير أفضل حماية لمعلوماتك. يتم نقل جميع المعلومات بشكل آمن ومحمي من الوصول غير المصرح به.',
+                rights_title: 'حقوقك',
+                rights_desc: 'لديك الحق في:',
+                right_item1: 'الوصول إلى معلوماتك',
+                right_item2: 'طلب تصحيح المعلومات غير الصحيحة',
+                right_item3: 'طلب حذف معلوماتك',
+                right_item4: 'الانسحاب من جمع البيانات',
+                right_item5: 'نقل معلوماتك',
+                rights_contact: 'لممارسة هذه الحقوق، يرجى الاتصال بنا عبر <a href="contact.html">صفحة الاتصال</a>.',
+                changes_title: 'التغييرات',
+                changes_desc: 'نحتفظ بالحق في تغيير هذه السياسة في أي وقت. ستظهر التغييرات مباشرة على هذه الصفحة وسيتم إخطار المستخدمين.',
+                last_updated: 'آخر تحديث: 29 أبريل 2026',
+                back_to_home: 'العودة إلى الرئيسية',
+                copyright: '© 2026 نظام مواقع السياحة الكردية. جميع الحقوق محفوظة.',
+                about: 'حول',
+                contact: 'اتصل بنا',
+                privacy: 'الخصوصية',
+                admin_panel: 'لوحة الإدارة'
+            }
+        };
+
+        // Simple language switching for privacy page
+        function changeLanguage(lang) {
+            localStorage.setItem('tourism_language', lang);
+            document.querySelectorAll('.lang-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.dataset.lang === lang) btn.classList.add('active');
+            });
+
+            // Update document direction
+            document.documentElement.lang = lang;
+            document.documentElement.dir = lang === 'en' ? 'ltr' : 'rtl';
+
+            // Update all elements with data-key
+            document.querySelectorAll('[data-key]').forEach(element => {
+                const key = element.getAttribute('data-key');
+                if (privacyLanguageData[lang] && privacyLanguageData[lang][key]) {
+                    element.textContent = privacyLanguageData[lang][key];
+                }
+            });
+        }
+
+        // Theme toggle
+        document.getElementById('theme-toggle').addEventListener('click', function () {
+            document.body.classList.toggle('light-mode');
+            const isLight = document.body.classList.contains('light-mode');
+            localStorage.setItem('tourism_theme', isLight ? 'light' : 'dark');
+            const icon = this.querySelector('i');
+            if (isLight) {
+                icon.classList.remove('fa-moon');
+                icon.classList.add('fa-sun');
+            } else {
+                icon.classList.remove('fa-sun');
+                icon.classList.add('fa-moon');
+            }
+        });
+
+        // Initialize language and theme
+        document.addEventListener('DOMContentLoaded', function () {
+            // Load language
+            const savedLang = localStorage.getItem('tourism_language') || 'ku';
+            changeLanguage(savedLang);
+
+            // Load theme
+            const savedTheme = localStorage.getItem('tourism_theme') || 'dark';
+            if (savedTheme === 'light') {
+                document.body.classList.add('light-mode');
+                const themeIcon = document.querySelector('#theme-toggle i');
+                if (themeIcon) {
+                    themeIcon.classList.remove('fa-moon');
+                    themeIcon.classList.add('fa-sun');
+                }
+            }
+        });
+    </script>
+</body>
+
+</html>
