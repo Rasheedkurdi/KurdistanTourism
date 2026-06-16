@@ -29,6 +29,9 @@ class UserAuth {
         } elseif (strlen($data['password']) < 8) {
             $errors[] = 'Password must be at least 8 characters';
         }
+        if (isset($data['confirm_password']) && !hash_equals((string) $data['password'], (string) $data['confirm_password'])) {
+            $errors[] = 'Password confirmation does not match';
+        }
         
         if (empty($data['full_name'])) {
             $errors[] = 'Full name is required';
@@ -49,8 +52,8 @@ class UserAuth {
         }
         
         // Create user
-        $passwordHash = password_hash($data['password'], PASSWORD_DEFAULT);
-        $verificationToken = bin2hex(random_bytes(32));
+        $passwordHash = secure_password_hash($data['password']);
+        $verificationCode = sprintf('%06d', random_int(100000, 999999));
         
         $userData = [
             'username' => $data['username'],
@@ -59,7 +62,9 @@ class UserAuth {
             'full_name' => $data['full_name'],
             'phone' => $data['phone'] ?? '',
             'language' => $data['language'] ?? 'ku',
-            'verification_token' => $verificationToken,
+            'verification_token' => null,
+            'verification_code' => verification_code_hash($verificationCode),
+            'code_expires_at' => date('Y-m-d H:i:s', strtotime('+15 minutes')),
             'is_verified' => 0
         ];
         
@@ -70,12 +75,12 @@ class UserAuth {
         }
         
         // Log activity
-        $this->logActivity($userId, 'login', null, '', $_SERVER['REMOTE_ADDR'], $_SERVER['HTTP_USER_AGENT']);
+        $this->logActivity($userId, 'login', null, '', request_client_ip(), request_user_agent());
         
         // Send verification email (if enabled)
         $requireVerification = $this->db->fetch("SELECT setting_value FROM settings WHERE setting_key = 'require_email_verification'");
         if ($requireVerification && $requireVerification['setting_value'] == '1') {
-            $this->sendVerificationEmail($data['email'], $verificationToken);
+            $this->sendVerificationEmail($data['email'], $verificationCode);
         }
         
         return [
@@ -91,6 +96,10 @@ class UserAuth {
         if (empty($username) || empty($password)) {
             return ['success' => false, 'errors' => ['Username and password are required']];
         }
+
+        if (auth_rate_limited('user_login', $username)) {
+            return ['success' => false, 'errors' => ['Too many login attempts. Try again later.']];
+        }
         
         // Find user
         $user = $this->db->fetch(
@@ -99,21 +108,28 @@ class UserAuth {
         );
         
         if (!$user || !password_verify($password, $user['password_hash'])) {
+            record_auth_failure('user_login', $username);
             return ['success' => false, 'errors' => ['Invalid username or password']];
         }
+
+        clear_auth_failures('user_login', $username);
         
         // Update login info
+        $loginUpdate = [
+            'last_login' => date('Y-m-d H:i:s'),
+            'login_count' => $user['login_count'] + 1
+        ];
+        if (secure_password_needs_rehash($user['password_hash'])) {
+            $loginUpdate['password_hash'] = secure_password_hash($password);
+        }
         $this->db->update('users', 
-            [
-                'last_login' => date('Y-m-d H:i:s'),
-                'login_count' => $user['login_count'] + 1
-            ],
+            $loginUpdate,
             'id = ?',
             [$user['id']]
         );
         
         // Log activity
-        $this->logActivity($user['id'], 'login', null, '', $_SERVER['REMOTE_ADDR'], $_SERVER['HTTP_USER_AGENT']);
+        $this->logActivity($user['id'], 'login', null, '', request_client_ip(), request_user_agent());
         
         // Create session
         session_regenerate_id(true);
@@ -131,7 +147,7 @@ class UserAuth {
     
     public function logout() {
         if (isset($_SESSION['user_id'])) {
-            $this->logActivity($_SESSION['user_id'], 'logout', null, '', $_SERVER['REMOTE_ADDR'], $_SERVER['HTTP_USER_AGENT']);
+            $this->logActivity($_SESSION['user_id'], 'logout', null, '', request_client_ip(), request_user_agent());
         }
 
         // Clear user-related session variables instead of destroying entire session
@@ -235,7 +251,7 @@ class UserAuth {
         }
         
         // Update password
-        $newPasswordHash = password_hash($newPassword, PASSWORD_DEFAULT);
+        $newPasswordHash = secure_password_hash($newPassword);
         $success = $this->db->update('users', 
             ['password_hash' => $newPasswordHash], 
             'id = ?', 
@@ -277,6 +293,7 @@ class UserAuth {
             $errorMsg = error_get_last();
             return ['success' => false, 'errors' => ['Failed to upload file. ' . ($errorMsg ? $errorMsg['message'] : '')]];
         }
+        chmod($absolutePath, 0644);
         
         // Update user avatar
         $success = $this->db->update('users', 
@@ -297,7 +314,7 @@ class UserAuth {
         $user = $this->db->fetch("SELECT * FROM users WHERE email = ? AND status = 'active'", [$email]);
         
         if (!$user) {
-            return ['success' => false, 'errors' => ['Email not found']];
+            return ['success' => true, 'message' => 'If the email exists, a password reset link will be sent'];
         }
         
         $resetToken = bin2hex(random_bytes(32));
@@ -315,7 +332,7 @@ class UserAuth {
         // Send reset email (implement email sending)
         $this->sendPasswordResetEmail($email, $resetToken);
         
-        return ['success' => true, 'message' => 'Password reset link sent to your email'];
+        return ['success' => true, 'message' => 'If the email exists, a password reset link will be sent'];
     }
     
     public function resetPassword($token, $newPassword) {
@@ -325,8 +342,8 @@ class UserAuth {
             return ['success' => false, 'errors' => ['Token and new password are required']];
         }
         
-        if (strlen($newPassword) < 6) {
-            return ['success' => false, 'errors' => ['Password must be at least 6 characters']];
+        if (strlen($newPassword) < 8) {
+            return ['success' => false, 'errors' => ['Password must be at least 8 characters']];
         }
         
         $user = $this->db->fetch(
@@ -338,7 +355,7 @@ class UserAuth {
             return ['success' => false, 'errors' => ['Invalid or expired reset token']];
         }
         
-        $passwordHash = password_hash($newPassword, PASSWORD_DEFAULT);
+        $passwordHash = secure_password_hash($newPassword);
         
         $this->db->update('users', 
             [
@@ -418,18 +435,23 @@ class UserAuth {
     }
     
     public function verifyEmail($email, $code) {
-        // Find user with matching email and verification code
+        if (auth_rate_limited('email_verify', $email)) {
+            return ['success' => false, 'error' => 'Too many verification attempts. Try again later.'];
+        }
+
         $user = $this->db->fetch(
-            "SELECT id, code_expires_at FROM users WHERE email = ? AND verification_code = ? AND is_verified = 0",
-            [$email, $code]
+            "SELECT id, verification_code, code_expires_at FROM users WHERE email = ? AND is_verified = 0",
+            [$email]
         );
         
-        if (!$user) {
+        if (!$user || !verify_stored_verification_code($code, $user['verification_code'] ?? null)) {
+            record_auth_failure('email_verify', $email);
             return ['success' => false, 'error' => 'Invalid verification code or email'];
         }
         
         // Check if code is expired
         if ($user['code_expires_at'] && strtotime($user['code_expires_at']) < time()) {
+            record_auth_failure('email_verify', $email);
             return ['success' => false, 'error' => 'Verification code expired'];
         }
         
@@ -438,6 +460,7 @@ class UserAuth {
             "UPDATE users SET is_verified = 1, verification_code = NULL, code_expires_at = NULL WHERE id = ?",
             [$user['id']]
         );
+        clear_auth_failures('email_verify', $email);
         
         return ['success' => true, 'message' => 'Email verified successfully'];
     }
@@ -445,12 +468,12 @@ class UserAuth {
     private function sendVerificationEmail($email, $token) {
         // Implement email sending
         // This is a placeholder - you would use a proper email service
-        error_log("Verification email sent to $email with token $token");
+        error_log("Verification email queued for $email");
     }
     
     private function sendPasswordResetEmail($email, $token) {
         // Implement email sending
         // This is a placeholder - you would use a proper email service
-        error_log("Password reset email sent to $email with token $token");
+        error_log("Password reset email queued for $email");
     }
 }
