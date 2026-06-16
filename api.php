@@ -1,14 +1,15 @@
 <?php
 require_once __DIR__ . '/config/bootstrap.php';
 
-
-header('Access-Control-Allow-Origin: *');
-header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
-header('Access-Control-Allow-Headers: Content-Type');
+configure_cors();
+header('Access-Control-Allow-Methods: GET, POST, DELETE, OPTIONS');
+header('Access-Control-Allow-Headers: Content-Type, X-CSRF-Token');
 
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit();
 }
+
+reject_cross_origin_state_change();
 
 $endpoint = $_GET['endpoint'] ?? '';
 $method = $_SERVER['REQUEST_METHOD'];
@@ -628,6 +629,9 @@ function admin_save_admin(): void
     if ($username === '' || $fullName === '') {
         json_response(['error' => 'Missing admin fields'], 422);
     }
+    if ($password !== '' && strlen($password) < 12) {
+        json_response(['error' => 'Admin password must be at least 12 characters'], 422);
+    }
 
     if ($id > 0) {
         if ($password !== '') {
@@ -782,7 +786,7 @@ function admin_save_government(): void
         trim($data['name_ku'] ?? ''),
         trim($data['name_en'] ?? ''),
         trim($data['name_ar'] ?? ''),
-        trim($data['color'] ?? '#3498db'),
+        sanitize_hex_color(trim($data['color'] ?? '#3498db')),
         $lat,
         $lng,
         (int) ($data['zoom_level'] ?? 10)
@@ -829,7 +833,7 @@ function admin_save_category(): void
         trim($data['name_ku'] ?? ''),
         trim($data['name_en'] ?? ''),
         trim($data['name_ar'] ?? ''),
-        trim($data['icon'] ?? 'map-marker-alt')
+        sanitize_icon_name(trim($data['icon'] ?? 'map-marker-alt'))
     ];
 
     if ($values[0] === '' || $values[1] === '' || $values[2] === '') {
@@ -1124,6 +1128,9 @@ function public_user_register(): void
     if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
         json_response(['error' => 'Invalid email format'], 422);
     }
+    if (strlen($password) < 8) {
+        json_response(['error' => 'Password must be at least 8 characters'], 422);
+    }
 
     $pdo = pdo();
 
@@ -1159,7 +1166,12 @@ function public_user_register(): void
     // In a real app, send email with $code here.
     // mail($email, "Your Verification Code", "Your code is: $code");
     
-    json_response(['success' => true, 'message' => 'Registration successful. Check your email for the verification code. (Mock: ' . $code . ')']);
+    $message = 'Registration successful. Check your email for the verification code.';
+    if ((getenv('SHOW_VERIFICATION_CODES') ?: '') === '1') {
+        $message .= ' Verification code: ' . $code;
+    }
+
+    json_response(['success' => true, 'message' => $message]);
 }
 
 function public_user_verify(): void
@@ -1219,6 +1231,7 @@ function public_user_login(): void
         $cancelStmt->execute([$user['id']]);
     }
 
+    session_regenerate_id(true);
     $_SESSION['user_logged_in'] = true;
     $_SESSION['user_id'] = $user['id'];
     $_SESSION['user_name'] = $user['full_name'];
@@ -1335,9 +1348,11 @@ function user_delete_profile(): void
 
 function cleanup_expired_accounts(): void
 {
+    require_admin();
     $pdo = pdo();
     $stmt = $pdo->prepare("DELETE FROM users WHERE marked_for_deletion_at IS NOT NULL AND marked_for_deletion_at < NOW()");
     $stmt->execute();
+    json_response(['success' => true]);
 }
 
 // Enhanced API Functions
@@ -1401,7 +1416,9 @@ function public_add_review(): void
     $title = $data['title'] ?? '';
     $comment = $data['comment'] ?? '';
     
-    if (!$locationId || !$rating || $comment === '') {
+    $locationId = (int) $locationId;
+    $rating = (int) $rating;
+    if ($locationId <= 0 || !$rating || $comment === '') {
         json_response(['error' => 'Missing required fields'], 422);
     }
     
@@ -1483,27 +1500,27 @@ function public_upload_photo(): void
     }
     
     $photo = $_FILES['photo'];
-    $locationId = $_POST['location_id'] ?? null;
+    $locationId = (int) ($_POST['location_id'] ?? 0);
     $title = $_POST['title'] ?? '';
     $description = $_POST['description'] ?? '';
-    
-    // Validate file
-    $allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
-    $finfo = finfo_open(FILEINFO_MIME_TYPE);
-    $mimeType = finfo_file($finfo, $photo['tmp_name']);
-    finfo_close($finfo);
-    
-    if (!in_array($mimeType, $allowedTypes)) {
-        json_response(['error' => 'Invalid file type'], 422);
+
+    if ($locationId <= 0) {
+        json_response(['error' => 'Invalid location'], 422);
     }
-    
-    if ($photo['size'] > 10 * 1024 * 1024) { // 10MB
-        json_response(['error' => 'File too large'], 422);
+
+    $pdo = pdo();
+    $locationStmt = $pdo->prepare("SELECT id FROM locations WHERE id = ? AND status = 'published'");
+    $locationStmt->execute([$locationId]);
+    if (!$locationStmt->fetch()) {
+        json_response(['error' => 'Location not found'], 404);
     }
-    
-    // Generate filename
-    $extension = pathinfo($photo['name'], PATHINFO_EXTENSION);
-    $filename = 'photo_' . $user['id'] . '_' . time() . '.' . $extension;
+
+    $extension = uploaded_image_extension($photo, 10 * 1024 * 1024);
+    if ($extension === null) {
+        json_response(['error' => 'Invalid image. Only JPG, PNG, GIF, and WebP files up to 10MB are allowed'], 422);
+    }
+
+    $filename = secure_random_filename('photo_' . $user['id'] . '_', $extension);
     
     // Use absolute path for server-side operations
     $baseDir = app()->uploadDir(); // e.g., C:/AppServ/www/project/uploads
@@ -1527,7 +1544,6 @@ function public_upload_photo(): void
     $height = $imageInfo[1] ?? 0;
     
     // Save to database
-    $pdo = pdo();
     $stmt = $pdo->prepare("
         INSERT INTO photos (location_id, user_id, title, description, image_path, file_size, width, height, status, created_at) 
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'published', NOW())
@@ -1743,11 +1759,11 @@ function public_delete_itinerary(): void
 
 function public_weather(): void
 {
-    $lat = $_GET['lat'] ?? null;
-    $lng = $_GET['lng'] ?? null;
+    $lat = isset($_GET['lat']) ? (float) $_GET['lat'] : null;
+    $lng = isset($_GET['lng']) ? (float) $_GET['lng'] : null;
     
-    if (!$lat || !$lng) {
-        json_response(['error' => 'Latitude and longitude required'], 422);
+    if ($lat === null || $lng === null || !is_valid_coordinate($lat, $lng)) {
+        json_response(['error' => 'Valid latitude and longitude required'], 422);
     }
     
     $pdo = pdo();
@@ -1775,9 +1791,17 @@ function public_weather(): void
         ]]);
     }
     
-    // Fetch from OpenWeatherMap (you'll need to add your API key)
-    $apiKey = 'YOUR_OPENWEATHER_API_KEY';
-    $url = "https://api.openweathermap.org/data/2.5/weather?lat=$lat&lon=$lng&appid=$apiKey&units=metric";
+    $apiKey = getenv('OPENWEATHER_API_KEY') ?: '';
+    if ($apiKey === '') {
+        json_response(['error' => 'Weather service unavailable'], 503);
+    }
+
+    $url = 'https://api.openweathermap.org/data/2.5/weather?' . http_build_query([
+        'lat' => $lat,
+        'lon' => $lng,
+        'appid' => $apiKey,
+        'units' => 'metric',
+    ]);
     
     $response = file_get_contents($url);
     if ($response === false) {
@@ -1785,6 +1809,12 @@ function public_weather(): void
     }
     
     $data = json_decode($response, true);
+    if (
+        !is_array($data)
+        || !isset($data['main']['temp'], $data['main']['humidity'], $data['weather'][0]['description'], $data['weather'][0]['icon'], $data['wind']['speed'])
+    ) {
+        json_response(['error' => 'Weather service unavailable'], 503);
+    }
     
     $weather = [
         'temperature' => round($data['main']['temp']),
@@ -1872,11 +1902,14 @@ function public_suggest_location(): void
     $imagePath = null;
     $imageBase64 = $data['image_base64'] ?? null;
     
-    if ($imageBase64 && strpos($imageBase64, 'data:image') === 0) {
-        // Extract image data from base64
-        $imageData = base64_decode(preg_replace('#^data:image/\w+;base64,#i', '', $imageBase64));
-        if ($imageData) {
-            // Use absolute path for server-side operations
+    if ($imageBase64 && preg_match('#^data:image/(jpeg|png|gif|webp);base64,#i', $imageBase64)) {
+        $imageData = base64_decode(preg_replace('#^data:image/(jpeg|png|gif|webp);base64,#i', '', $imageBase64), true);
+        if ($imageData !== false) {
+            $extension = image_data_extension($imageData, 5 * 1024 * 1024);
+            if ($extension === null) {
+                json_response(['error' => 'Invalid suggestion image'], 422);
+            }
+
             $baseDir = app()->uploadDir();
             $suggestionsDir = $baseDir . '/suggestions';
             
@@ -1884,13 +1917,11 @@ function public_suggest_location(): void
                 mkdir($suggestionsDir, 0755, true);
             }
             
-            // Generate unique filename
-            $filename = 'suggestion_' . $user['id'] . '_' . time() . '_' . uniqid() . '.jpg';
+            $filename = secure_random_filename('suggestion_' . $user['id'] . '_', $extension);
             $destination = $suggestionsDir . '/' . $filename;
             
-            // Save image file
             if (file_put_contents($destination, $imageData)) {
-                $imagePath = 'uploads/suggestions/' . $filename; // Relative path for DB
+                $imagePath = 'uploads/suggestions/' . $filename;
             }
         }
     }
@@ -1919,7 +1950,7 @@ function public_suggest_location(): void
         trim($data['opening_hours'] ?? ''),
         trim($data['ticket_price'] ?? ''),
         $imagePath,
-        $imageBase64 ? substr($imageBase64, 0, 10000) : null
+        null
     ]);
 
     json_response(['success' => true, 'message' => 'Suggestion submitted for review']);

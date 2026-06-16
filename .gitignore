@@ -1,0 +1,6 @@
+.env
+.env.*
+*.log
+*.sql
+uploads/*
+!uploads/.htaccess

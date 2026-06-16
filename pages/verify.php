@@ -1,5 +1,4 @@
 <?php
-session_start();
 require_once __DIR__ . '/../config/user_auth.php';
 
 $email = $_GET['email'] ?? '';
@@ -15,6 +14,7 @@ $error = '';
 $success = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    require_csrf_token();
     $code = trim($_POST['code'] ?? '');
     $email = trim($_POST['email'] ?? '');
     
@@ -192,6 +192,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </div>
             <?php else: ?>
                 <form method="POST" action="">
+                    <?php echo csrf_input(); ?>
                     <div class="form-group">
                         <label for="email">ئیمەیڵ / Email</label>
                         <input type="email" id="email" name="email" value="<?php echo htmlspecialchars($email); ?>" required>

@@ -4,7 +4,7 @@ class Database
     private $host = 'localhost';
     private $dbName = 'kurdish_tourism_db';
     private $username = 'root';
-    private $password = '00000000';
+    private $password = '';
     private static $instance = null;
 
     public function __construct() {}
@@ -25,26 +25,19 @@ class Database
         $password = getenv('DB_PASSWORD') ?: $this->password;
 
         try {
-            // Try with provided password first
             $pdo = new PDO(
                 "mysql:host={$host};dbname={$dbName};charset=utf8mb4",
                 $username,
                 $password,
-                [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
+                [
+                    PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+                    PDO::ATTR_EMULATE_PREPARES => false,
+                ]
             );
         } catch (PDOException $e) {
-            // If provided password fails, try empty password
-            try {
-                $pdo = new PDO(
-                    "mysql:host={$host};dbname={$dbName};charset=utf8mb4",
-                    $username,
-                    '',
-                    [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
-                );
-            } catch (PDOException $e2) {
-                error_log("Database connection failed: " . $e2->getMessage());
-                return null;
-            }
+            error_log("Database connection failed: " . $e->getMessage());
+            return null;
         }
 
         return $pdo;
@@ -58,8 +51,8 @@ class Database
             return null;
         }
         
-        // Build column names and placeholders
-        $columns = implode(', ', array_keys($data));
+        $table = $this->assertIdentifier($table);
+        $columns = implode(', ', array_map([$this, 'assertIdentifier'], array_keys($data)));
         $placeholders = implode(', ', array_fill(0, count($data), '?'));
         
         $sql = "INSERT INTO {$table} ({$columns}) VALUES ({$placeholders})";
@@ -119,9 +112,11 @@ class Database
             return false;
         }
 
+        $table = $this->assertIdentifier($table);
         $setClauses = [];
         $values = [];
         foreach ($data as $column => $value) {
+            $column = $this->assertIdentifier($column);
             $setClauses[] = "{$column} = ?";
             $values[] = $value;
         }
@@ -147,6 +142,7 @@ class Database
             return false;
         }
 
+        $table = $this->assertIdentifier($table);
         $sql = "DELETE FROM {$table} WHERE {$where}";
 
         try {
@@ -157,6 +153,31 @@ class Database
             error_log("Delete error: " . $e->getMessage());
             return false;
         }
+    }
+
+    public function execute(string $sql, array $params = []): bool
+    {
+        $pdo = $this->getConnection();
+        if (!$pdo) {
+            return false;
+        }
+
+        try {
+            $stmt = $pdo->prepare($sql);
+            return $stmt->execute($params);
+        } catch (PDOException $e) {
+            error_log("Execute error: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    private function assertIdentifier(string $identifier): string
+    {
+        if (!preg_match('/^[A-Za-z_][A-Za-z0-9_]*$/', $identifier)) {
+            throw new InvalidArgumentException('Invalid database identifier.');
+        }
+
+        return $identifier;
     }
 }
 ?>
