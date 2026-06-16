@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . '/database.php';
+require_once __DIR__ . '/bootstrap.php';
 
 class UserAuth {
     private $db;
@@ -26,8 +26,8 @@ class UserAuth {
         
         if (empty($data['password'])) {
             $errors[] = 'Password is required';
-        } elseif (strlen($data['password']) < 6) {
-            $errors[] = 'Password must be at least 6 characters';
+        } elseif (strlen($data['password']) < 8) {
+            $errors[] = 'Password must be at least 8 characters';
         }
         
         if (empty($data['full_name'])) {
@@ -116,6 +116,7 @@ class UserAuth {
         $this->logActivity($user['id'], 'login', null, '', $_SERVER['REMOTE_ADDR'], $_SERVER['HTTP_USER_AGENT']);
         
         // Create session
+        session_regenerate_id(true);
         $_SESSION['user_logged_in'] = true;
         $_SESSION['user_id'] = $user['id'];
         $_SESSION['user_name'] = $user['full_name'];
@@ -218,8 +219,8 @@ class UserAuth {
             $errors[] = 'Current and new passwords are required';
         }
         
-        if (strlen($newPassword) < 6) {
-            $errors[] = 'New password must be at least 6 characters';
+        if (strlen($newPassword) < 8) {
+            $errors[] = 'New password must be at least 8 characters';
         }
         
         if (!empty($errors)) {
@@ -251,30 +252,17 @@ class UserAuth {
     public function uploadAvatar($userId, $file) {
         $errors = [];
         
-        // Validate file
         if (!isset($file['tmp_name']) || !is_uploaded_file($file['tmp_name'])) {
             return ['success' => false, 'errors' => ['No file uploaded']];
         }
-        
-        $allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
-        $imageInfo = getimagesize($file['tmp_name']);
-        if (!$imageInfo) {
-            return ['success' => false, 'errors' => ['File is not a valid image']];
-        }
-        $mimeType = $imageInfo['mime'];
-        
-        if (!in_array($mimeType, $allowedTypes)) {
-            return ['success' => false, 'errors' => ['Invalid file type. Only JPG, PNG, GIF, and WebP are allowed']];
-        }
-        
+
         $maxSize = 5 * 1024 * 1024; // 5MB
-        if ($file['size'] > $maxSize) {
-            return ['success' => false, 'errors' => ['File too large. Maximum size is 5MB']];
+        $extension = uploaded_image_extension($file, $maxSize);
+        if ($extension === null) {
+            return ['success' => false, 'errors' => ['Invalid image. Only JPG, PNG, GIF, and WebP files up to 5MB are allowed']];
         }
-        
-        // Generate unique filename
-        $extension = pathinfo($file['name'], PATHINFO_EXTENSION);
-        $filename = 'avatar_' . $userId . '_' . time() . '.' . $extension;
+
+        $filename = secure_random_filename('avatar_' . $userId . '_', $extension);
         $relativePath = 'uploads/avatars/' . $filename;
         $absolutePath = dirname(__DIR__) . '/' . $relativePath;
         

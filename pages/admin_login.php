@@ -9,6 +9,7 @@ if (current_admin()) {
 
 $error = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    require_csrf_token();
     $username = trim($_POST['username'] ?? '');
     $password = trim($_POST['password'] ?? '');
 
@@ -83,6 +84,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </head>
 <body>
     <form class="card" method="post">
+        <?php echo csrf_input(); ?>
         <h1>Admin Login</h1>
         <?php if ($error !== ''): ?>
             <div class="error"><?php echo htmlspecialchars($error, ENT_QUOTES, 'UTF-8'); ?></div>

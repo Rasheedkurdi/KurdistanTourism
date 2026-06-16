@@ -1,5 +1,4 @@
 <?php
-session_start();
 require_once __DIR__ . '/../config/user_auth.php';
 
 $auth = new UserAuth();
@@ -14,6 +13,7 @@ $errors = [];
 $success = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    require_csrf_token();
     $result = $auth->register($_POST);
     
     if ($result['success']) {
@@ -283,6 +283,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <?php endif; ?>
                 
                 <form method="post" id="register-form">
+                    <?php echo csrf_input(); ?>
                     <div class="form-row">
                         <div class="form-group">
                             <label for="username">ناوی بەکارهێنەر *</label>

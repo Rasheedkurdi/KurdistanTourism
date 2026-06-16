@@ -2824,43 +2824,8 @@ async function fetchWeatherForLocation(lat, lng) {
             }
         }
         
-        // Check if API key is configured
-        const apiKey = 'YOUR_OPENWEATHER_API_KEY';
-        if (apiKey === 'YOUR_OPENWEATHER_API_KEY') {
-            console.log('Weather API key not configured, using fallback data');
-            // Use fallback weather data for demo purposes
-            const fallbackWeather = {
-                temperature: 22,
-                condition: 'Partly cloudy',
-                icon: '02d',
-                humidity: 45,
-                windSpeed: 3.5
-            };
-            updateWeatherDisplay(fallbackWeather);
-            return;
-        }
-        
-        // Fetch from API (using OpenWeatherMap)
-        const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lng}&appid=${apiKey}&units=metric`);
-        
-        if (!response.ok) {
-            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-        }
-        
-        const data = await response.json();
-        
-        // Check for API errors
-        if (data.cod && data.cod !== 200) {
-            throw new Error(data.message || 'API error');
-        }
-        
-        const weather = {
-            temperature: Math.round(data.main.temp),
-            condition: data.weather[0].description,
-            icon: data.weather[0].icon,
-            humidity: data.main.humidity,
-            windSpeed: data.wind.speed
-        };
+        const data = await api(`weather&lat=${encodeURIComponent(lat)}&lng=${encodeURIComponent(lng)}`);
+        const weather = data.weather;
         
         // Cache the data
         localStorage.setItem(cacheKey, JSON.stringify({
@@ -2893,11 +2858,11 @@ function updateWeatherDisplay(weather) {
 
     weatherInfo.innerHTML = `
         <div class="weather-current">
-            <div class="weather-temp">${weather.temperature}°C</div>
-            <div class="weather-condition">${weather.condition}</div>
+            <div class="weather-temp">${escapeHtml(weather.temperature)}°C</div>
+            <div class="weather-condition">${escapeHtml(weather.condition)}</div>
             <div class="weather-details">
-                <div><i class="fas fa-tint"></i> ${weather.humidity}%</div>
-                <div><i class="fas fa-wind"></i> ${weather.windSpeed} m/s</div>
+                <div><i class="fas fa-tint"></i> ${escapeHtml(weather.humidity)}%</div>
+                <div><i class="fas fa-wind"></i> ${escapeHtml(weather.windSpeed)} m/s</div>
             </div>
         </div>
     `;

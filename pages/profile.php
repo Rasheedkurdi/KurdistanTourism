@@ -1,5 +1,4 @@
 <?php
-session_start();
 require_once __DIR__ . '/../config/user_auth.php';
 
 $auth = new UserAuth();
@@ -9,6 +8,7 @@ $errors = [];
 $success = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    require_csrf_token();
     if (isset($_POST['update_profile'])) {
         $result = $auth->updateProfile($user['id'], $_POST);
         
@@ -660,6 +660,7 @@ try {
                     <?php endif; ?>
                     
                     <form id="avatar-form" method="post" enctype="multipart/form-data">
+                        <?php echo csrf_input(); ?>
                         <div class="avatar-upload">
                             <img src="<?php echo !empty($user['avatar']) ? htmlspecialchars($user['avatar']) : 'https://ui-avatars.com/api/?name=' . urlencode($user['full_name']) . '&background=667eea&color=fff&size=80'; ?>" 
                                  alt="Avatar" style="width: 80px; height: 80px; border-radius: 50%; margin-bottom: 10px;">
@@ -671,6 +672,7 @@ try {
                         </div>
                     </form>
                     <form method="post">
+                        <?php echo csrf_input(); ?>
                         <div class="form-group">
                             <label for="full_name" class="lang-text" data-key="full_name_label">ناوی تەواو</label>
                             <input type="text" id="full_name" name="full_name" 
@@ -719,6 +721,7 @@ try {
                     </h2>
                     
                     <form method="post">
+                        <?php echo csrf_input(); ?>
                         <div class="form-group">
                             <label for="current_password" class="lang-text" data-key="current_password_label">تێپەڕەوشەی ئێستا</label>
                             <input type="password" id="current_password" name="current_password" required>

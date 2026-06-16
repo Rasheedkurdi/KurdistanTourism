@@ -20,6 +20,7 @@ class AdminAuth
             return false;
         }
 
+        session_regenerate_id(true);
         $_SESSION['admin_logged_in'] = true;
         $_SESSION['admin_id'] = (int) $admin['id'];
         $_SESSION['admin_name'] = $admin['full_name'];

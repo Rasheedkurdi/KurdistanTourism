@@ -1,22 +1,9 @@
 <?php
-session_start();
+require_once __DIR__ . '/../config/admin_auth.php';
 
-// Destroy all session data
-$_SESSION = array();
+$auth = new AdminAuth();
+$auth->logout();
 
-// Destroy the session cookie
-if (ini_get("session.use_cookies")) {
-    $params = session_get_cookie_params();
-    setcookie(session_name(), '', time() - 42000,
-        $params["path"], $params["domain"],
-        $params["secure"], $params["httponly"]
-    );
-}
-
-// Destroy the session
-session_destroy();
-
-// Redirect to login page
-header("Location: admin_login.php");
+header('Location: admin_login.php');
 exit();
 ?>

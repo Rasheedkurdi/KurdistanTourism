@@ -1,5 +1,4 @@
 <?php
-session_start();
 require_once __DIR__ . '/../config/user_auth.php';
 
 $auth = new UserAuth();
@@ -14,6 +13,7 @@ $errors = [];
 $success = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    require_csrf_token();
     if (isset($_POST['login'])) {
         $result = $auth->login($_POST['username'], $_POST['password']);
         
@@ -292,6 +292,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 
                 <!-- Login Form -->
                 <form method="post" class="login-form <?php echo !empty($success) ? 'hide-login' : ''; ?>">
+                    <?php echo csrf_input(); ?>
                     <div class="form-group">
                         <label for="username">ناوی بەکارهێنەر یان ئیمەیل</label>
                         <div class="input-icon">
@@ -317,6 +318,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 
                 <!-- Forgot Password Form -->
                 <form method="post" class="forgot-form <?php echo !empty($success) ? 'show-forgot' : ''; ?>">
+                    <?php echo csrf_input(); ?>
                     <div class="form-group">
                         <label for="email">ئیمەیل</label>
                         <div class="input-icon">
