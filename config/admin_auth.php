@@ -7,6 +7,10 @@ class AdminAuth
 {
     public function login(string $username, string $password): bool
     {
+        if (auth_rate_limited('admin_login', $username)) {
+            return false;
+        }
+
         $stmt = pdo()->prepare(
             "SELECT id, username, password_hash, full_name, role
              FROM admins
@@ -17,9 +21,11 @@ class AdminAuth
         $admin = $stmt->fetch();
 
         if (!$admin || !password_verify($password, $admin['password_hash'])) {
+            record_auth_failure('admin_login', $username);
             return false;
         }
 
+        clear_auth_failures('admin_login', $username);
         session_regenerate_id(true);
         $_SESSION['admin_logged_in'] = true;
         $_SESSION['admin_id'] = (int) $admin['id'];
@@ -27,8 +33,13 @@ class AdminAuth
         $_SESSION['admin_username'] = $admin['username'];
         $_SESSION['admin_role'] = $admin['role'];
 
-        $update = pdo()->prepare("UPDATE admins SET last_login = NOW() WHERE id = ?");
-        $update->execute([$admin['id']]);
+        if (secure_password_needs_rehash($admin['password_hash'])) {
+            $update = pdo()->prepare("UPDATE admins SET last_login = NOW(), password_hash = ? WHERE id = ?");
+            $update->execute([secure_password_hash($password), $admin['id']]);
+        } else {
+            $update = pdo()->prepare("UPDATE admins SET last_login = NOW() WHERE id = ?");
+            $update->execute([$admin['id']]);
+        }
 
         return true;
     }
@@ -41,11 +52,14 @@ class AdminAuth
             setcookie(
                 session_name(),
                 '',
-                time() - 42000,
-                $params['path'],
-                $params['domain'],
-                $params['secure'],
-                $params['httponly']
+                [
+                    'expires' => time() - 42000,
+                    'path' => $params['path'],
+                    'domain' => $params['domain'],
+                    'secure' => $params['secure'],
+                    'httponly' => $params['httponly'],
+                    'samesite' => $params['samesite'] ?? 'Lax',
+                ]
             );
         }
         session_destroy();

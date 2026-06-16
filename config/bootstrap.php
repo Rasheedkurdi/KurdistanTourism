@@ -1,13 +1,16 @@
 <?php
 function is_https_request(): bool
 {
+    $forwardedProto = strtolower(trim(explode(',', $_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '')[0]));
     return (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
-        || (($_SERVER['SERVER_PORT'] ?? '') === '443');
+        || (($_SERVER['SERVER_PORT'] ?? '') === '443')
+        || $forwardedProto === 'https';
 }
 
 ini_set('session.use_strict_mode', '1');
 ini_set('session.cookie_httponly', '1');
 ini_set('session.cookie_samesite', 'Lax');
+ini_set('session.cookie_secure', is_https_request() ? '1' : '0');
 
 if (session_status() === PHP_SESSION_NONE) {
     session_set_cookie_params([
@@ -32,6 +35,9 @@ function send_security_headers(): void
     header('X-Content-Type-Options: nosniff');
     header('X-Frame-Options: SAMEORIGIN');
     header('Referrer-Policy: strict-origin-when-cross-origin');
+    header('Content-Security-Policy: frame-ancestors \'self\'; object-src \'none\'; base-uri \'self\'; form-action \'self\'');
+    header('Permissions-Policy: geolocation=(self), camera=(self), microphone=()');
+    header('X-Permitted-Cross-Domain-Policies: none');
     if (is_https_request()) {
         header('Strict-Transport-Security: max-age=31536000; includeSubDomains');
     }
@@ -105,7 +111,7 @@ class AppBootstrap
                 avatar VARCHAR(255) DEFAULT NULL,
                 status ENUM('active','suspended','deleted') NOT NULL DEFAULT 'active',
                 is_verified TINYINT(1) NOT NULL DEFAULT 0,
-                verification_code VARCHAR(10) DEFAULT NULL,
+                verification_code VARCHAR(255) DEFAULT NULL,
                 verification_token VARCHAR(64) DEFAULT NULL,
                 code_expires_at DATETIME DEFAULT NULL,
                 last_login DATETIME DEFAULT NULL,
@@ -268,6 +274,17 @@ class AppBootstrap
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 KEY idx_contact_status (status),
                 KEY idx_contact_email (email)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4",
+            "CREATE TABLE IF NOT EXISTS auth_rate_limits (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                scope VARCHAR(50) NOT NULL,
+                identifier_hash CHAR(64) NOT NULL,
+                attempts INT NOT NULL DEFAULT 0,
+                locked_until DATETIME DEFAULT NULL,
+                last_attempt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                UNIQUE KEY unique_auth_rate_limit (scope, identifier_hash),
+                KEY idx_auth_rate_limits_locked_until (locked_until),
+                KEY idx_auth_rate_limits_last_attempt (last_attempt)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4"
         ];
 
@@ -277,6 +294,7 @@ class AppBootstrap
 
         // Ensure optional columns added in later migrations exist
         $this->ensureColumn('locations', 'directions_url', "ALTER TABLE locations ADD COLUMN directions_url VARCHAR(255) DEFAULT '' AFTER website");
+        $this->ensureColumnType('users', 'verification_code', 'varchar(255)', "ALTER TABLE users MODIFY verification_code VARCHAR(255) DEFAULT NULL");
 
         // Ensure missing columns in location_suggestions
         $this->ensureColumn('location_suggestions', 'phone', "ALTER TABLE location_suggestions ADD COLUMN phone VARCHAR(80) DEFAULT NULL AFTER address");
@@ -307,7 +325,7 @@ class AppBootstrap
             );
             $stmt->execute([
                 getenv('DEFAULT_ADMIN_USERNAME') ?: 'admin',
-                password_hash($defaultAdminPassword, PASSWORD_DEFAULT),
+                secure_password_hash($defaultAdminPassword),
                 'System Administrator',
                 getenv('DEFAULT_ADMIN_EMAIL') ?: 'admin@example.com',
                 'super_admin'
@@ -373,6 +391,19 @@ class AppBootstrap
         );
         $stmt->execute([$table, $column]);
         if ((int) $stmt->fetchColumn() === 0) {
+            $this->pdo->exec($sql);
+        }
+    }
+
+    private function ensureColumnType(string $table, string $column, string $expectedType, string $sql): void
+    {
+        $stmt = $this->pdo->prepare(
+            "SELECT COLUMN_TYPE FROM INFORMATION_SCHEMA.COLUMNS
+             WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ? AND COLUMN_NAME = ?"
+        );
+        $stmt->execute([$table, $column]);
+        $columnType = $stmt->fetchColumn();
+        if (is_string($columnType) && strtolower($columnType) !== strtolower($expectedType)) {
             $this->pdo->exec($sql);
         }
     }
@@ -459,14 +490,31 @@ function reject_cross_origin_state_change(): void
         return;
     }
 
-    $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
-    if ($origin === '') {
-        return;
+    $fetchSite = $_SERVER['HTTP_SEC_FETCH_SITE'] ?? '';
+    if ($fetchSite === 'cross-site') {
+        json_response(['error' => 'Cross-origin request blocked'], 403);
     }
 
+    $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
     $allowedOrigins = allowed_cors_origins();
-    if ($origin !== request_origin() && !in_array($origin, $allowedOrigins, true)) {
+    if ($origin !== '' && $origin !== request_origin() && !in_array($origin, $allowedOrigins, true)) {
         json_response(['error' => 'Cross-origin request blocked'], 403);
+    }
+
+    $referer = $_SERVER['HTTP_REFERER'] ?? '';
+    if ($origin === '' && $referer !== '') {
+        $refererParts = parse_url($referer);
+        if (!is_array($refererParts) || empty($refererParts['scheme']) || empty($refererParts['host'])) {
+            json_response(['error' => 'Cross-origin request blocked'], 403);
+        }
+        $refererOrigin = $refererParts['scheme'] . '://' . $refererParts['host'];
+        $refererPort = $refererParts['port'] ?? null;
+        if ($refererPort !== null) {
+            $refererOrigin .= ':' . $refererPort;
+        }
+        if ($refererOrigin !== request_origin() && !in_array($refererOrigin, $allowedOrigins, true)) {
+            json_response(['error' => 'Cross-origin request blocked'], 403);
+        }
     }
 }
 
@@ -495,6 +543,108 @@ function require_csrf_token(): void
         http_response_code(419);
         exit('Invalid security token.');
     }
+}
+
+function secure_password_algorithm()
+{
+    return defined('PASSWORD_ARGON2ID') ? PASSWORD_ARGON2ID : PASSWORD_DEFAULT;
+}
+
+function secure_password_options(): array
+{
+    if (defined('PASSWORD_ARGON2ID')) {
+        return [
+            'memory_cost' => PASSWORD_ARGON2_DEFAULT_MEMORY_COST,
+            'time_cost' => PASSWORD_ARGON2_DEFAULT_TIME_COST,
+            'threads' => PASSWORD_ARGON2_DEFAULT_THREADS,
+        ];
+    }
+
+    return [];
+}
+
+function secure_password_hash(string $password): string
+{
+    return password_hash($password, secure_password_algorithm(), secure_password_options());
+}
+
+function secure_password_needs_rehash(string $hash): bool
+{
+    return password_needs_rehash($hash, secure_password_algorithm(), secure_password_options());
+}
+
+function verification_code_hash(string $code): string
+{
+    return secure_password_hash($code);
+}
+
+function verify_stored_verification_code(string $code, ?string $storedCode): bool
+{
+    if ($storedCode === null || $storedCode === '') {
+        return false;
+    }
+
+    $info = password_get_info($storedCode);
+    if (($info['algo'] ?? 0) !== 0) {
+        return password_verify($code, $storedCode);
+    }
+
+    return hash_equals($storedCode, $code);
+}
+
+function request_client_ip(): string
+{
+    return $_SERVER['REMOTE_ADDR'] ?? '';
+}
+
+function request_user_agent(): string
+{
+    return substr($_SERVER['HTTP_USER_AGENT'] ?? '', 0, 255);
+}
+
+function auth_rate_limit_hash(string $scope, string $identifier): string
+{
+    return hash('sha256', $scope . '|' . strtolower(trim($identifier)) . '|' . request_client_ip());
+}
+
+function auth_rate_limited(string $scope, string $identifier): bool
+{
+    $pdo = pdo();
+    $pdo->exec("DELETE FROM auth_rate_limits WHERE last_attempt < DATE_SUB(NOW(), INTERVAL 1 DAY)");
+
+    $stmt = $pdo->prepare("SELECT locked_until FROM auth_rate_limits WHERE scope = ? AND identifier_hash = ? LIMIT 1");
+    $stmt->execute([$scope, auth_rate_limit_hash($scope, $identifier)]);
+    $lockedUntil = $stmt->fetchColumn();
+
+    return is_string($lockedUntil) && $lockedUntil !== '' && strtotime($lockedUntil) > time();
+}
+
+function record_auth_failure(string $scope, string $identifier, int $maxAttempts = 5, int $lockMinutes = 15): void
+{
+    $pdo = pdo();
+    $identifierHash = auth_rate_limit_hash($scope, $identifier);
+    $stmt = $pdo->prepare("SELECT attempts, locked_until FROM auth_rate_limits WHERE scope = ? AND identifier_hash = ? LIMIT 1");
+    $stmt->execute([$scope, $identifierHash]);
+    $row = $stmt->fetch();
+
+    $attempts = 1;
+    if ($row && empty($row['locked_until'])) {
+        $attempts = (int) $row['attempts'] + 1;
+    }
+
+    $lockedUntil = $attempts >= $maxAttempts ? date('Y-m-d H:i:s', strtotime("+{$lockMinutes} minutes")) : null;
+    $upsert = $pdo->prepare(
+        "INSERT INTO auth_rate_limits (scope, identifier_hash, attempts, locked_until, last_attempt)
+         VALUES (?, ?, ?, ?, NOW())
+         ON DUPLICATE KEY UPDATE attempts = VALUES(attempts), locked_until = VALUES(locked_until), last_attempt = NOW()"
+    );
+    $upsert->execute([$scope, $identifierHash, $attempts, $lockedUntil]);
+}
+
+function clear_auth_failures(string $scope, string $identifier): void
+{
+    $stmt = pdo()->prepare("DELETE FROM auth_rate_limits WHERE scope = ? AND identifier_hash = ?");
+    $stmt->execute([$scope, auth_rate_limit_hash($scope, $identifier)]);
 }
 
 function image_extension_from_mime(string $mimeType): ?string
@@ -644,6 +794,7 @@ function save_uploaded_images(int $locationId, array $files): array
             error_log("Failed to move uploaded file $tmpName to $destination: " . ($error['message'] ?? 'unknown error'));
             continue;
         }
+        chmod($destination, 0644);
 
         $relativePath = 'uploads/' . $filename;
         $stmt->execute([$locationId, $relativePath, $index]);

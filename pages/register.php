@@ -348,7 +348,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             <i class="fas fa-lock"></i>
                             <input type="password" id="password" name="password" required 
                                    placeholder="تێپەڕەوشە"
-                                   minlength="6">
+                                   minlength="8">
                         </div>
                         <div class="password-strength">
                             <div class="password-strength-bar" id="strength-bar"></div>
@@ -406,7 +406,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             const password = this.value;
             let strength = 0;
             
-            if (password.length >= 6) strength++;
+            if (password.length >= 8) strength++;
             if (password.length >= 10) strength++;
             if (/[a-z]/.test(password)) strength++;
             if (/[A-Z]/.test(password)) strength++;

@@ -439,8 +439,8 @@ function public_visit(): void
     $stmt->execute([
         $locationId ?: null,
         $userId,
-        $_SERVER['REMOTE_ADDR'] ?? '',
-        substr($_SERVER['HTTP_USER_AGENT'] ?? '', 0, 255)
+        request_client_ip(),
+        request_user_agent()
     ]);
 
     if ($locationId) {
@@ -621,7 +621,7 @@ function admin_save_admin(): void
     $id = (int) ($data['id'] ?? 0);
     $username = trim($data['username'] ?? '');
     $fullName = trim($data['full_name'] ?? '');
-    $password = trim($data['password'] ?? '');
+    $password = (string) ($data['password'] ?? '');
     $role = ($data['role'] ?? 'admin') === 'super_admin' ? 'super_admin' : 'admin';
     $email = trim($data['email'] ?? '');
     $active = !empty($data['active']) ? 1 : 0;
@@ -639,7 +639,7 @@ function admin_save_admin(): void
                 "UPDATE admins SET username = ?, full_name = ?, email = ?, role = ?, active = ?, password_hash = ?
                  WHERE id = ?"
             );
-            $stmt->execute([$username, $fullName, $email, $role, $active, password_hash($password, PASSWORD_DEFAULT), $id]);
+            $stmt->execute([$username, $fullName, $email, $role, $active, secure_password_hash($password), $id]);
         } else {
             $stmt = pdo()->prepare(
                 "UPDATE admins SET username = ?, full_name = ?, email = ?, role = ?, active = ?
@@ -655,7 +655,7 @@ function admin_save_admin(): void
             "INSERT INTO admins (username, password_hash, full_name, email, role, active)
              VALUES (?, ?, ?, ?, ?, ?)"
         );
-        $stmt->execute([$username, password_hash($password, PASSWORD_DEFAULT), $fullName, $email, $role, $active]);
+        $stmt->execute([$username, secure_password_hash($password), $fullName, $email, $role, $active]);
     }
 
     json_response(['success' => true]);
@@ -1120,7 +1120,7 @@ function public_user_register(): void
     $name = trim($data['name'] ?? '');
     $username = trim($data['username'] ?? '');
     $email = trim($data['email'] ?? '');
-    $password = trim($data['password'] ?? '');
+    $password = (string) ($data['password'] ?? '');
 
     if ($name === '' || $email === '' || $password === '') {
         json_response(['error' => 'All fields are required'], 422);
@@ -1153,15 +1153,15 @@ function public_user_register(): void
     // Use email as username fallback if not provided
     $finalUsername = $username !== '' ? $username : $email;
 
-    $code = sprintf('%06d', mt_rand(100000, 999999));
+    $code = sprintf('%06d', random_int(100000, 999999));
     $expiresAt = date('Y-m-d H:i:s', strtotime('+15 minutes'));
-    $hash = password_hash($password, PASSWORD_DEFAULT);
+    $hash = secure_password_hash($password);
 
     $stmt = $pdo->prepare(
         "INSERT INTO users (full_name, username, email, password_hash, verification_code, code_expires_at) 
          VALUES (?, ?, ?, ?, ?, ?)"
     );
-    $stmt->execute([$name, $finalUsername, $email, $hash, $code, $expiresAt]);
+    $stmt->execute([$name, $finalUsername, $email, $hash, verification_code_hash($code), $expiresAt]);
 
     // In a real app, send email with $code here.
     // mail($email, "Your Verification Code", "Your code is: $code");
@@ -1184,20 +1184,27 @@ function public_user_verify(): void
         json_response(['error' => 'Email and code are required'], 422);
     }
 
+    if (auth_rate_limited('email_verify', $email)) {
+        json_response(['error' => 'Too many verification attempts. Try again later.'], 429);
+    }
+
     $pdo = pdo();
-    $stmt = $pdo->prepare("SELECT id, code_expires_at FROM users WHERE email = ? AND verification_code = ?");
-    $stmt->execute([$email, $code]);
+    $stmt = $pdo->prepare("SELECT id, verification_code, code_expires_at FROM users WHERE email = ? AND is_verified = 0");
+    $stmt->execute([$email]);
     $user = $stmt->fetch();
 
-    if (!$user) {
+    if (!$user || !verify_stored_verification_code($code, $user['verification_code'] ?? null)) {
+        record_auth_failure('email_verify', $email);
         json_response(['error' => 'Invalid verification code or email'], 400);
     }
     if (strtotime($user['code_expires_at']) < time()) {
+        record_auth_failure('email_verify', $email);
         json_response(['error' => 'Verification code expired'], 400);
     }
 
     $update = $pdo->prepare("UPDATE users SET is_verified = 1, verification_code = NULL, code_expires_at = NULL WHERE id = ?");
     $update->execute([$user['id']]);
+    clear_auth_failures('email_verify', $email);
 
     json_response(['success' => true, 'message' => 'Email verified successfully']);
 }
@@ -1206,10 +1213,14 @@ function public_user_login(): void
 {
     $data = request_data();
     $email = trim($data['email'] ?? '');
-    $password = trim($data['password'] ?? '');
+    $password = (string) ($data['password'] ?? '');
 
     if ($email === '' || $password === '') {
         json_response(['error' => 'Email and password are required'], 422);
+    }
+
+    if (auth_rate_limited('api_user_login', $email)) {
+        json_response(['error' => 'Too many login attempts. Try again later.'], 429);
     }
 
     $pdo = pdo();
@@ -1218,8 +1229,11 @@ function public_user_login(): void
     $user = $stmt->fetch();
 
     if (!$user || !password_verify($password, $user['password_hash'])) {
+        record_auth_failure('api_user_login', $email);
         json_response(['error' => 'Invalid email or password'], 401);
     }
+
+    clear_auth_failures('api_user_login', $email);
 
     if (!$user['is_verified']) {
         json_response(['error' => 'Email is not verified'], 403);
@@ -1229,6 +1243,10 @@ function public_user_login(): void
     if ($user['marked_for_deletion_at']) {
         $cancelStmt = $pdo->prepare("UPDATE users SET marked_for_deletion_at = NULL, deletion_reason = NULL WHERE id = ?");
         $cancelStmt->execute([$user['id']]);
+    }
+    if (secure_password_needs_rehash($user['password_hash'])) {
+        $rehashStmt = $pdo->prepare("UPDATE users SET password_hash = ? WHERE id = ?");
+        $rehashStmt->execute([secure_password_hash($password), $user['id']]);
     }
 
     session_regenerate_id(true);
@@ -1301,7 +1319,7 @@ function user_edit_profile(): void
     $user = require_user();
     $data = request_data();
     $name = trim($data['name'] ?? '');
-    $password = trim($data['password'] ?? '');
+    $password = (string) ($data['password'] ?? '');
 
     $avatar = trim($data['avatar'] ?? '');
 
@@ -1314,8 +1332,11 @@ function user_edit_profile(): void
     $params = [$name];
     
     if ($password !== '') {
+        if (strlen($password) < 8) {
+            json_response(['error' => 'Password must be at least 8 characters'], 422);
+        }
         $updateFields[] = 'password_hash = ?';
-        $params[] = password_hash($password, PASSWORD_DEFAULT);
+        $params[] = secure_password_hash($password);
     }
     
     if ($avatar !== '') {
@@ -1537,6 +1558,7 @@ function public_upload_photo(): void
     if (!move_uploaded_file($photo['tmp_name'], $destination)) {
         json_response(['error' => 'Upload failed'], 500);
     }
+    chmod($destination, 0644);
     
     // Get image dimensions - use absolute path
     $imageInfo = getimagesize($destination);
@@ -1921,6 +1943,7 @@ function public_suggest_location(): void
             $destination = $suggestionsDir . '/' . $filename;
             
             if (file_put_contents($destination, $imageData)) {
+                chmod($destination, 0644);
                 $imagePath = 'uploads/suggestions/' . $filename;
             }
         }
@@ -2068,7 +2091,7 @@ function public_contact_submit(): void
          VALUES (?, ?, ?, ?, ?, ?, NOW())"
     );
     
-    $ipAddress = $_SERVER['REMOTE_ADDR'] ?? null;
+    $ipAddress = request_client_ip();
     $stmt->execute([$fullName, $email, $phone, $subject, $message, $ipAddress]);
     
     json_response(['success' => true, 'message' => 'Message sent successfully. We will get back to you soon!']);
