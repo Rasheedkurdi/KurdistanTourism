@@ -7,6 +7,11 @@ class AdminAuth
 {
     public function login(string $username, string $password): bool
     {
+        $rateLimitKey = rate_limit_key('admin_login', $username);
+        if (rate_limit_is_blocked($rateLimitKey)) {
+            return false;
+        }
+
         $stmt = pdo()->prepare(
             "SELECT id, username, password_hash, full_name, role
              FROM admins
@@ -17,8 +22,10 @@ class AdminAuth
         $admin = $stmt->fetch();
 
         if (!$admin || !password_verify($password, $admin['password_hash'])) {
+            rate_limit_record_failure($rateLimitKey);
             return false;
         }
+        rate_limit_clear($rateLimitKey);
 
         session_regenerate_id(true);
         $_SESSION['admin_logged_in'] = true;
@@ -42,10 +49,13 @@ class AdminAuth
                 session_name(),
                 '',
                 time() - 42000,
-                $params['path'],
-                $params['domain'],
-                $params['secure'],
-                $params['httponly']
+                [
+                    'path' => $params['path'],
+                    'domain' => $params['domain'],
+                    'secure' => $params['secure'],
+                    'httponly' => $params['httponly'],
+                    'samesite' => $params['samesite'] ?? 'Lax',
+                ]
             );
         }
         session_destroy();

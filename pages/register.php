@@ -11,6 +11,10 @@ if ($auth->getCurrentUser()) {
 
 $errors = [];
 $success = '';
+$oauthError = trim($_GET['oauth_error'] ?? '');
+if ($oauthError !== '') {
+    $errors[] = $oauthError;
+}
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     require_csrf_token();
@@ -162,6 +166,53 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             transform: translateY(-2px);
             box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
         }
+
+        .oauth-buttons {
+            display: grid;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .btn-oauth {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            background: #fff;
+            color: #1f2937;
+            border: 1px solid #d1d5db;
+            text-decoration: none;
+        }
+
+        .btn-oauth:hover {
+            background: #f8fafc;
+            border-color: #667eea;
+            transform: translateY(-1px);
+        }
+
+        .divider {
+            text-align: center;
+            margin: 20px 0;
+            position: relative;
+        }
+
+        .divider::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: #e1e8ed;
+        }
+
+        .divider span {
+            background: white;
+            padding: 0 15px;
+            position: relative;
+            color: #999;
+            font-size: 14px;
+        }
         
         .auth-footer {
             padding: 20px 30px;
@@ -263,6 +314,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         body:not(.light-mode) .password-strength {
             background: #334155;
         }
+        body:not(.light-mode) .btn-oauth {
+            background: #0f172a;
+            border-color: #334155;
+            color: #f1f5f9;
+        }
+        body:not(.light-mode) .btn-oauth:hover {
+            background: #172033;
+        }
+        body:not(.light-mode) .divider::before {
+            background: #334155;
+        }
+        body:not(.light-mode) .divider span {
+            background: #1e293b;
+            color: #94a3b8;
+        }
     </style>
 </head>
 <body>
@@ -281,6 +347,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <?php endforeach; ?>
                     </div>
                 <?php endif; ?>
+
+                <div class="oauth-buttons">
+                    <a class="btn btn-oauth" href="oauth_start.php?provider=google" rel="nofollow">
+                        <i class="fab fa-google"></i> Continue with Google
+                    </a>
+                </div>
+
+                <div class="divider"><span>یان هەژماری نوێ درووست بکە</span></div>
                 
                 <form method="post" id="register-form">
                     <?php echo csrf_input(); ?>

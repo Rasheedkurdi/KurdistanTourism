@@ -11,6 +11,10 @@ if ($auth->getCurrentUser()) {
 
 $errors = [];
 $success = '';
+$oauthError = trim($_GET['oauth_error'] ?? '');
+if ($oauthError !== '') {
+    $errors[] = $oauthError;
+}
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     require_csrf_token();
@@ -167,6 +171,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         .btn-secondary:hover {
             background: #e9ecef;
         }
+
+        .oauth-buttons {
+            display: grid;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .btn-oauth {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            background: #fff;
+            color: #1f2937;
+            border: 1px solid #d1d5db;
+            text-decoration: none;
+        }
+
+        .btn-oauth:hover {
+            background: #f8fafc;
+            border-color: #667eea;
+            transform: translateY(-1px);
+        }
         
         .auth-footer {
             padding: 20px 30px;
@@ -265,6 +292,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             background: #334155;
             color: #f1f5f9;
         }
+        body:not(.light-mode) .btn-oauth {
+            background: #0f172a;
+            border-color: #334155;
+            color: #f1f5f9;
+        }
+        body:not(.light-mode) .btn-oauth:hover {
+            background: #172033;
+        }
     </style>
 </head>
 <body>
@@ -289,6 +324,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <?php echo htmlspecialchars($success); ?>
                     </div>
                 <?php endif; ?>
+
+                <div class="oauth-buttons">
+                    <a class="btn btn-oauth" href="oauth_start.php?provider=google" rel="nofollow">
+                        <i class="fab fa-google"></i> Continue with Google
+                    </a>
+                </div>
+
+                <div class="divider"><span>یان بە هەژماری ئیمەیل</span></div>
                 
                 <!-- Login Form -->
                 <form method="post" class="login-form <?php echo !empty($success) ? 'hide-login' : ''; ?>">

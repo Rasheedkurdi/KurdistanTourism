@@ -439,8 +439,8 @@ function public_visit(): void
     $stmt->execute([
         $locationId ?: null,
         $userId,
-        $_SERVER['REMOTE_ADDR'] ?? '',
-        substr($_SERVER['HTTP_USER_AGENT'] ?? '', 0, 255)
+        client_ip(),
+        client_user_agent()
     ]);
 
     if ($locationId) {
@@ -1153,7 +1153,7 @@ function public_user_register(): void
     // Use email as username fallback if not provided
     $finalUsername = $username !== '' ? $username : $email;
 
-    $code = sprintf('%06d', mt_rand(100000, 999999));
+    $code = (string) random_int(100000, 999999);
     $expiresAt = date('Y-m-d H:i:s', strtotime('+15 minutes'));
     $hash = password_hash($password, PASSWORD_DEFAULT);
 
@@ -1207,9 +1207,13 @@ function public_user_login(): void
     $data = request_data();
     $email = trim($data['email'] ?? '');
     $password = trim($data['password'] ?? '');
+    $rateLimitKey = rate_limit_key('api_user_login', $email);
 
     if ($email === '' || $password === '') {
         json_response(['error' => 'Email and password are required'], 422);
+    }
+    if (rate_limit_is_blocked($rateLimitKey)) {
+        json_response(['error' => 'Too many login attempts. Please wait and try again.'], 429);
     }
 
     $pdo = pdo();
@@ -1218,8 +1222,10 @@ function public_user_login(): void
     $user = $stmt->fetch();
 
     if (!$user || !password_verify($password, $user['password_hash'])) {
+        rate_limit_record_failure($rateLimitKey);
         json_response(['error' => 'Invalid email or password'], 401);
     }
+    rate_limit_clear($rateLimitKey);
 
     if (!$user['is_verified']) {
         json_response(['error' => 'Email is not verified'], 403);
@@ -1230,6 +1236,9 @@ function public_user_login(): void
         $cancelStmt = $pdo->prepare("UPDATE users SET marked_for_deletion_at = NULL, deletion_reason = NULL WHERE id = ?");
         $cancelStmt->execute([$user['id']]);
     }
+
+    $loginStmt = $pdo->prepare("UPDATE users SET last_login = NOW(), login_count = login_count + 1 WHERE id = ?");
+    $loginStmt->execute([$user['id']]);
 
     session_regenerate_id(true);
     $_SESSION['user_logged_in'] = true;
@@ -1363,7 +1372,7 @@ function public_user_current(): void
     $session = current_user();
     if ($session) {
         $pdo = pdo();
-        $stmt = $pdo->prepare("SELECT id, username, email, full_name, phone, avatar, bio, language, created_at FROM users WHERE id = ? AND status = 'active'");
+        $stmt = $pdo->prepare("SELECT id, username, email, full_name, phone, avatar, avatar_url, bio, language, auth_provider, created_at FROM users WHERE id = ? AND status = 'active'");
         $stmt->execute([$session['id']]);
         $user = $stmt->fetch();
 
@@ -2068,7 +2077,7 @@ function public_contact_submit(): void
          VALUES (?, ?, ?, ?, ?, ?, NOW())"
     );
     
-    $ipAddress = $_SERVER['REMOTE_ADDR'] ?? null;
+    $ipAddress = client_ip();
     $stmt->execute([$fullName, $email, $phone, $subject, $message, $ipAddress]);
     
     json_response(['success' => true, 'message' => 'Message sent successfully. We will get back to you soon!']);

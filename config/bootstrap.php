@@ -6,6 +6,8 @@ function is_https_request(): bool
 }
 
 ini_set('session.use_strict_mode', '1');
+ini_set('session.use_only_cookies', '1');
+ini_set('session.use_trans_sid', '0');
 ini_set('session.cookie_httponly', '1');
 ini_set('session.cookie_samesite', 'Lax');
 
@@ -32,6 +34,8 @@ function send_security_headers(): void
     header('X-Content-Type-Options: nosniff');
     header('X-Frame-Options: SAMEORIGIN');
     header('Referrer-Policy: strict-origin-when-cross-origin');
+    header('Permissions-Policy: camera=(self), microphone=(), geolocation=(self)');
+    header("Content-Security-Policy: base-uri 'self'; frame-ancestors 'self'; object-src 'none'; form-action 'self'");
     if (is_https_request()) {
         header('Strict-Transport-Security: max-age=31536000; includeSubDomains');
     }
@@ -116,6 +120,20 @@ class AppBootstrap
                 deletion_reason VARCHAR(255) DEFAULT NULL,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4",
+            "CREATE TABLE IF NOT EXISTS user_oauth_identities (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                user_id INT NOT NULL,
+                provider VARCHAR(40) NOT NULL,
+                provider_user_id VARCHAR(191) NOT NULL,
+                email VARCHAR(150) NOT NULL,
+                display_name VARCHAR(120) DEFAULT '',
+                avatar_url VARCHAR(255) DEFAULT '',
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                UNIQUE KEY uq_oauth_provider_user (provider, provider_user_id),
+                KEY idx_oauth_user (user_id),
+                CONSTRAINT fk_oauth_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4",
             "CREATE TABLE IF NOT EXISTS governments (
                 id INT AUTO_INCREMENT PRIMARY KEY,
@@ -276,6 +294,9 @@ class AppBootstrap
         }
 
         // Ensure optional columns added in later migrations exist
+        $this->ensureColumn('users', 'auth_provider', "ALTER TABLE users ADD COLUMN auth_provider VARCHAR(40) DEFAULT 'password' AFTER is_verified");
+        $this->ensureColumn('users', 'auth_provider_id', "ALTER TABLE users ADD COLUMN auth_provider_id VARCHAR(191) DEFAULT NULL AFTER auth_provider");
+        $this->ensureColumn('users', 'avatar_url', "ALTER TABLE users ADD COLUMN avatar_url VARCHAR(255) DEFAULT NULL AFTER avatar");
         $this->ensureColumn('locations', 'directions_url', "ALTER TABLE locations ADD COLUMN directions_url VARCHAR(255) DEFAULT '' AFTER website");
 
         // Ensure missing columns in location_suggestions
@@ -495,6 +516,60 @@ function require_csrf_token(): void
         http_response_code(419);
         exit('Invalid security token.');
     }
+}
+
+function app_url(string $path = ''): string
+{
+    $base = rtrim(getenv('APP_URL') ?: request_origin(), '/');
+    if ($base === '') {
+        $base = '.';
+    }
+
+    return $base . '/' . ltrim($path, '/');
+}
+
+function html_escape(string $value): string
+{
+    return htmlspecialchars($value, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+}
+
+function client_ip(): string
+{
+    return substr($_SERVER['REMOTE_ADDR'] ?? 'unknown', 0, 45);
+}
+
+function client_user_agent(): string
+{
+    return substr($_SERVER['HTTP_USER_AGENT'] ?? '', 0, 255);
+}
+
+function rate_limit_key(string $scope, string $identifier): string
+{
+    return $scope . ':' . hash('sha256', strtolower(trim($identifier)) . '|' . client_ip());
+}
+
+function rate_limit_is_blocked(string $key, int $maxAttempts = 5, int $windowSeconds = 900): bool
+{
+    $now = time();
+    $_SESSION['_rate_limits'][$key] = array_values(array_filter(
+        $_SESSION['_rate_limits'][$key] ?? [],
+        static function ($timestamp) use ($now, $windowSeconds): bool {
+            return is_int($timestamp) && $timestamp > $now - $windowSeconds;
+        }
+    ));
+
+    return count($_SESSION['_rate_limits'][$key]) >= $maxAttempts;
+}
+
+function rate_limit_record_failure(string $key): void
+{
+    $_SESSION['_rate_limits'][$key] ??= [];
+    $_SESSION['_rate_limits'][$key][] = time();
+}
+
+function rate_limit_clear(string $key): void
+{
+    unset($_SESSION['_rate_limits'][$key]);
 }
 
 function image_extension_from_mime(string $mimeType): ?string
